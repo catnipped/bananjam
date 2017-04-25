@@ -39,6 +39,7 @@ function create_enemy_destroyer(x, y)
    enemy.w = 2
    enemy.h = 2
    enemy.shotPattern = 2
+   enemy.polarity = false
    return enemy
 end
 
@@ -66,19 +67,23 @@ function update_enemy(e)
       if e.y < 50 then
          e.y += 0.15
       elseif e.x < 64 then
+         enemy.polarity = true
          e.x -= 1
       else
+         enemy.polarity = true
          e.x += 1
       end
    elseif e.movement == 3 then
       if e.state == 0 then
+         enemy.polarity = true
          e.y += 0.25
          if e.y > 64 then
             e.state = 1
          end
       else
+         enemy.polarity = false
          e.y -= 0.25
-         if e.y < 0 then
+         if e.y < 0 then            
             e.state = 0
          end
       end
