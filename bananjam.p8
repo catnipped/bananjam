@@ -53,6 +53,12 @@ triggers = {}
 --   end
 -- end
 
+progress = 0
+
+function spawn_enemy_by_progress()
+   
+end
+
 function lerp(a,b,t)
   return a + t*(b-a)
 end
