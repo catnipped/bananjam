@@ -76,7 +76,10 @@ function _init ()
   add(enemies,enemy[1])
 end
 function player_control()
-  if btn(4) and every(10) then add(player.projectiles,{player.x+2, player.y-4}) end
+  if btn(4) and player.energy > 0 then
+    add(player.projectiles,{player.x+3, player.y})
+    player.energy -= 0.1
+  end
   if btnp(5) then
     if polarity == false then polarity = true
     elseif polarity == true then polarity = false
@@ -93,12 +96,13 @@ function _update60 ()
 
   -- player update
   player_control()
-  player.energy += 0.1
+  player.energy += 0.05
   -- shield.x = lerp(shield.x,player.x-4,0.1)
 	-- shield.y = lerp(shield.y,player.y-8,0.5)
 	for n in all(player.projectiles) do
-		n[2] -= 1
-		if n[2] < 10 then del(player.projectiles,player.projectiles[1]) end
+		n[2] -= 5
+    n[1] = player.x+3
+		if n[2] < 00 then del(player.projectiles,player.projectiles[1]) end
 	end
 
   --enemies
@@ -129,6 +133,11 @@ function _draw ()
     pal(0,0)
   else draw_stars() end
 
+  --projectiles
+  for n in all(player.projectiles) do
+    if polarity == true then line(n[1],n[2],n[1],n[2]+5,0)
+    else line(n[1],n[2],n[1],n[2]+5,7) end
+  end
 
 	--player
   local ship_sprite = 5
@@ -142,12 +151,6 @@ function _draw ()
 	if btn(0) then spr(ship_sprite_turning,player.x-1,player.y)
 	elseif btn(1) then spr(ship_sprite_turning,player.x,player.y,1,1,true)
 	else spr(ship_sprite,player.x,player.y) end
-
-  --projectiles
-  for n in all(player.projectiles) do
-    if every(4,0,2) then spr(23, n[1], n[2])
-    else spr(24, n[1], n[2]) end
-  end
 
 	-- spr(21,shield.x,shield.y,2,1)
 
