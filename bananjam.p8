@@ -3,7 +3,7 @@ version 8
 __lua__
 
 function enemy_base(x, y)
-   enemy = {}
+   local enemy = {}
    add(enemies, enemy)
    enemy.x = x
    enemy.y = y
@@ -121,9 +121,9 @@ e_projectiles = {}
 progress = 0
 
 function spawn_enemy_by_progress()
-   r = flr(rnd(4))
-   x = 20 + rnd(128 - 40)
-   y = -16
+   local r = flr(rnd(4))
+   local x = 20 + rnd(128 - 40)
+   local y = -16
    if r == 0 then
       create_enemy_simple(x, y)
    elseif r == 1 then
@@ -294,8 +294,8 @@ function _update60 ()
 end
 
 function inside(point, enemy)
-   px = point[1] or point.x
-   py = point[2] or point.y
+   local px = point[1] or point.x
+   local py = point[2] or point.y
    return
       px > enemy.x and px < enemy.x + enemy.w * 8 and
       py > enemy.y and py < enemy.y + enemy.h * 8
