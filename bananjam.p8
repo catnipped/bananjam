@@ -13,21 +13,21 @@ enemy[1].polarity = false
 
 enemies = {}
 triggers = {}
-function trigger(label,d,f)
-  if triggers.label == nil then
-    add(triggers,label = {bool = true, duration = d, func = f})
-  else triggers.label.bool = true end
-end
-
-function execute_triggers()
-  for t in all(triggers) do
-    if t.label.bool == true then
-      if frames % t.label.duration == 0 and t.label.bool == true then
-        t.label.bool = false
-      elseif t.label.bool == true then t.label.func() end
-    end
-  end
-end
+-- function trigger(label,d,f)
+--   if triggers.label == nil then
+--     add(triggers,label = {bool = true, duration = d, func = f})
+--   else triggers.label.bool = true end
+-- end
+--
+-- function execute_triggers()
+--   for t in all(triggers) do
+--     if t.label.bool == true then
+--       if frames % t.label.duration == 0 and t.label.bool == true then
+--         t.label.bool = false
+--       elseif t.label.bool == true then t.label.func() end
+--     end
+--   end
+-- end
 
 function lerp(a,b,t)
   return a + t*(b-a)
@@ -109,7 +109,6 @@ end
 function _update60 ()
 	frames += 1
   update_stars()
-  execute_triggers()
 
   -- player update
   player_control()
@@ -229,7 +228,7 @@ function _draw ()
         map(0,0,0,0,1,16)
       end
     end
-    trigger("polaritylabel",100,polaritylabel())
+    -- trigger("polaritylabel",100,polaritylabel())
 
 
   end
