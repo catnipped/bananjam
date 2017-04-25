@@ -27,6 +27,7 @@ function create_enemy_grunt(x, y)
 end
 
 enemies = {}
+e_projectiles = {}
 triggers = {}
 -- function trigger(label,d,f)
 --   if triggers.label == nil then
@@ -55,6 +56,35 @@ function every(duration,offset,period)
   return offset_frames % duration < period
 end
 
+function add_e_projectile(e_x,e_y, e_polarity, e_direction, e_velocity, e_size) --needs only an x,y
+  e_direction = e_direction or 0
+  e_velocity = e_velocity or 1
+  e_polarity = e_polarity or false
+  e_size = e_size or 1
+  local projectile = {x = e_x,y = e_y, direction = e_direction, velocity = e_velocity, polarity = e_polarity, size = e_size}
+  add(e_projectiles,projectile)
+end
+
+function update_e_projectiles()
+  for p in all(e_projectiles) do
+    p.x = p.x+p.velocity*sin(p.direction)
+    p.y = p.y+p.velocity*cos(p.direction)
+  end
+end
+
+function draw_e_projectiles()
+  for p in all(e_projectiles) do
+    if p.polarity == true then
+      circfill(p.x,p.y,p.size+1,7)
+      circfill(p.x,p.y,p.size,0)
+    else
+      circfill(p.x,p.y,p.size,0)
+      circfill(p.x,p.y,p.size,7)
+    end
+  end
+end
+
+
 function init_stars()
 	stars = {}
 		for i=1,50 do
@@ -81,7 +111,7 @@ function draw_stars()
 	for star in all(stars) do
 		if (star.y > 0) then
 			rectfill(star.x-1, star.y-1, star.x+1, (star.y+star.s)+1, 0)
-			line(star.x, star.y, star.x, star.y+star.s, 7)
+			line(star.x, star.y, star.x, star.y+star.s, (5+rnd(2)))
 		end
 	end
 end
@@ -148,8 +178,11 @@ function _update60 ()
        e.x += sin(e.y / 50) * 0.5
        e.y += 0.25
     end
-  end
 
+    if every(30) then add_e_projectile(e.x,e.y,e.polarity) end
+
+  end
+  update_e_projectiles()
   collisions()
 end
 
@@ -194,6 +227,7 @@ function _draw ()
     if polarity == true then line(n[1],n[2],n[1],n[2]+5,0)
     else line(n[1],n[2],n[1],n[2]+5,7) end
   end
+  draw_e_projectiles()
 
 	--player
   local ship_sprite = 5
