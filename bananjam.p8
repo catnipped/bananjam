@@ -240,6 +240,43 @@ function collisions()
    end
 end
 
+function draw_UI()
+  palt(0,false)
+  palt(14,true)
+	rectfill(0,0,8,128,7)
+	rectfill(127-8,0,128,128,0)
+  if btn(4) and every(4,0,2) then
+    pal(0,7)
+    pal(7,0)
+  end
+  map(2,0,0,0,1,16)
+  pal()
+  if polarity == true then
+    rectfill(1,1,7,128-player.energy,7)
+    rect(0,0,8,127,0)
+  else
+    rectfill(1,1,7,128-player.energy,0)
+    rect(0,0,8,127,7)
+  end
+
+  if btn (5) then
+    function polaritylabel()
+      if polarity == false then
+        rectfill(0,0,8,128,0)
+        pal(0,7)
+        map(1,0,0,0,1,16)
+      elseif polarity == true then
+        rectfill(0,0,8,128,7)
+        pal(7,0)
+        map(0,0,0,0,1,16)
+      end
+    end
+    -- trigger("polaritylabel",100,polaritylabel())
+  end
+
+  print(("cpu".. stat(1)),10,1,14)
+end
+
 function _draw ()
   cls()
 	pal()
@@ -301,41 +338,9 @@ function _draw ()
 
   end
   pal()
-	--ui
-  palt(0,false)
-  palt(14,true)
-	rectfill(0,0,8,128,7)
-	rectfill(127-8,0,128,128,0)
-  if btn(4) and every(4,0,2) then
-    pal(0,7)
-    pal(7,0)
-  end
-  map(2,0,0,0,1,16)
-  pal()
-  if polarity == true then
-    rectfill(1,1,7,128-player.energy,7)
-    rect(0,0,8,127,0)
-  else
-    rectfill(1,1,7,128-player.energy,0)
-    rect(0,0,8,127,7)
-  end
 
-  if btn (5) then
-    function polaritylabel()
-      if polarity == false then
-        rectfill(0,0,8,128,0)
-        pal(0,7)
-        map(1,0,0,0,1,16)
-      elseif polarity == true then
-        rectfill(0,0,8,128,7)
-        pal(7,0)
-        map(0,0,0,0,1,16)
-      end
-    end
-    -- trigger("polaritylabel",100,polaritylabel())
-  end
 
-  print(("cpu".. stat(1)),10,1,14)
+  draw_UI()
 
 end
 __gfx__
@@ -633,4 +638,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
