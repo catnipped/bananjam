@@ -146,6 +146,12 @@ function every(duration,offset,period)
   return offset_frames % duration < period
 end
 
+function pythagoras(ax,ay,bx,by)
+  local x = ax-bx
+  local y = ay-by
+  return sqrt(x*x+y*y)
+end
+
 function add_e_projectile(e_x,e_y, e_polarity, e_direction, e_velocity, e_size) --needs only an x,y
   e_direction = e_direction or 0
   e_velocity = e_velocity or 1
@@ -157,8 +163,14 @@ end
 
 function update_e_projectiles()
   for p in all(e_projectiles) do
-    p.x = p.x+p.velocity*sin(p.direction)
-    p.y = p.y+p.velocity*cos(p.direction)
+
+    if pythagoras(p.x,p.y,player.x,player.y) < 15 and p.polarity ~= polarity then
+      p.x = lerp(p.x,player.x+3,0.2)
+      p.y = lerp(p.y,player.y+6,0.2)
+    else
+      p.x = p.x+p.velocity*sin(p.direction)
+      p.y = p.y+p.velocity*cos(p.direction)
+    end
   end
   for p = #e_projectiles, 1, -1 do
     local x = e_projectiles[p].x
