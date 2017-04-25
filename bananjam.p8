@@ -57,9 +57,6 @@ triggers = {}
 progress = 0
 
 function spawn_enemy_by_progress()
-<<<<<<< HEAD
-
-=======
    r = flr(rnd(3))
    x = rnd(128)
    y = -16
@@ -70,7 +67,6 @@ function spawn_enemy_by_progress()
    elseif r == 2 then
       create_enemy_destroyer(x, y)
    end
->>>>>>> origin/master
 end
 
 function lerp(a,b,t)
@@ -203,7 +199,7 @@ function _update60 ()
     if frames % 120 == 0 then
        spawn_enemy_by_progress()
     end
-    
+
   for e in all(enemies) do
     if e.movement == 0 then
       if e.polarity == false then e.x += 0.5
