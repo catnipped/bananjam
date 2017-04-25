@@ -316,10 +316,10 @@ function collisions()
   --enemy collisions
   for p = #e_projectiles, 1, -1 do
       if inside(e_projectiles[p], player) then
-        if e_projectiles[p].polarity ~= player.polarity then
-          player.energy += e_projectiles[p].size
-        elseif e_projectiles[p].polarity == player.polarity then
-          player.energy -= e_projectiles[p].size*3
+        if e_projectiles[p].polarity ~= polarity then
+          player.energy += 5
+        elseif e_projectiles[p].polarity == polarity then
+          player.energy -= 10
         end
         del(e_projectiles,e_projectiles[p])
       end
@@ -338,11 +338,11 @@ function draw_UI()
 
   -- pal()
   if polarity == true then
-    rectfill(2,129-player.energy,6,121,7)
-    rectfill(1,128-player.energy,5,120,0)
+    rectfill(2,121-player.energy,6,121,7)
+    rectfill(1,120-player.energy,5,120,0)
   else
-    rectfill(2,129-player.energy,6,121,0)
-    rectfill(1,128-player.energy,5,120,7)
+    rectfill(2,121-player.energy,6,121,0)
+    rectfill(1,120-player.energy,5,120,7)
   end
 
   if btn (5) then
