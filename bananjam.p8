@@ -56,7 +56,7 @@ triggers = {}
 progress = 0
 
 function spawn_enemy_by_progress()
-   
+
 end
 
 function lerp(a,b,t)
@@ -166,6 +166,8 @@ function player_control()
   if btn(1) then player.x += 1 end
   if btn(3) then player.y += 1 end
   if btn(0) then player.x -= 1 end
+  player.x =mid (8,player.x,112)
+  player.y =mid (0,player.y,11562)
 end
 function _update60 ()
 	frames += 1
