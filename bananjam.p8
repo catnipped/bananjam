@@ -4,6 +4,7 @@ __lua__
 
 function enemy_base(x, y)
    enemy = {}
+   add(enemies, enemy)
    enemy.x = x
    enemy.y = y
    enemy.polarity = false
@@ -56,7 +57,20 @@ triggers = {}
 progress = 0
 
 function spawn_enemy_by_progress()
+<<<<<<< HEAD
 
+=======
+   r = flr(rnd(3))
+   x = rnd(128)
+   y = -16
+   if r == 0 then
+      create_enemy_simple(x, y)
+   elseif r == 1 then
+      create_enemy_grunt(x, y)
+   elseif r == 2 then
+      create_enemy_destroyer(x, y)
+   end
+>>>>>>> origin/master
 end
 
 function lerp(a,b,t)
@@ -149,7 +163,7 @@ function _init ()
 	shield.y = 58
 
     --add(enemies, create_enemy_grunt(64, 10))
-    add(enemies, create_enemy_destroyer(64, 10))
+    --add(enemies, create_enemy_destroyer(64, 10))
 end
 
 function player_control()
@@ -184,7 +198,12 @@ function _update60 ()
 		if n[2] < 00 then del(player.projectiles,player.projectiles[1]) end
 	end
 
-  --enemies
+    --enemies
+
+    if frames % 120 == 0 then
+       spawn_enemy_by_progress()
+    end
+    
   for e in all(enemies) do
     if e.movement == 0 then
       if e.polarity == false then e.x += 0.5
