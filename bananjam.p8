@@ -12,7 +12,7 @@ end
 
 function create_enemy_simple(x, y)
    enemy = enemy_base(x, y)
-   enemy.hp = 3
+   enemy.hp = 20
    enemy.sprite = 32
    enemy.movement = 0
    return enemy
@@ -20,7 +20,7 @@ end
 
 function create_enemy_grunt(x, y)
    enemy = enemy_base(x, y)
-   enemy.hp = 10
+   enemy.hp = 30
    enemy.sprite = 64
    enemy.movement = 1
    return enemy
@@ -212,7 +212,8 @@ function collisions()
    for p in all(player.projectiles) do
       for e in all(enemies) do
          if inside(p, e) then
-            e.hp -= 3
+            e.hp -= 1
+            e.hit = true
          end
       end
    end
@@ -257,16 +258,27 @@ function _draw ()
 	-- spr(21,shield.x,shield.y,2,1)
 
   --enemies
-    for e in all(enemies) do
-       if e.hp <= 0 then
+  for e in all(enemies) do
+    if e.hp <= 0 then
           -- dont draw when dead, remove this code later
     elseif e.polarity == true then
       pal(0,7)
       pal(7,0)
-      spr(e.sprite,e.x,e.y)
-      pal(7,7)
+    end
+    if e.hit and polarity == true then
       pal(0,0)
-    else spr(e.sprite,e.x,e.y) end
+      pal(8,0)
+      pal(7,0)
+      e.hit = false
+    elseif e.hit and polarity == false then
+      pal(0,7)
+      pal(8,7)
+      pal(7,7)
+      e.hit = false
+    end
+
+    spr(e.sprite,e.x,e.y)
+    pal()
   end
 
 	--ui
@@ -280,6 +292,7 @@ function _draw ()
     rectfill(1,1,7,128-player.energy,0)
     rect(0,0,8,127,7)
   end
+
   if btn (5) then
     function polaritylabel()
       if polarity == false then
@@ -595,4 +608,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
