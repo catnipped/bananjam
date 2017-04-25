@@ -12,6 +12,22 @@ enemy[1].movement = 0
 enemy[1].polarity = false
 
 enemies = {}
+triggers = {}
+function trigger(label,d,f)
+  if triggers.label == nil then
+    add(triggers,label = {bool = true, duration = d, func = f})
+  else triggers.label.bool = true end
+end
+
+function execute_triggers()
+  for t in all(triggers) do
+    if t.label.bool == true then
+      if frames % t.label.duration == 0 and t.label.bool == true then
+        t.label.bool = false
+      elseif t.label.bool == true then t.label.func() end
+    end
+  end
+end
 
 function lerp(a,b,t)
   return a + t*(b-a)
@@ -93,6 +109,7 @@ end
 function _update60 ()
 	frames += 1
   update_stars()
+  execute_triggers()
 
   -- player update
   player_control()
@@ -200,10 +217,24 @@ function _draw ()
     rectfill(1,1,7,128-player.energy,0)
     rect(0,0,8,127,7)
   end
-	-- map(1,0,0,0,1,16)
-	-- pal(0,7)
-	-- map(0,0,127-8,0,1,16)
-	-- pal(7,0)
+  if btn (5) then
+    function polaritylabel()
+      if polarity == false then
+        rectfill(0,0,8,128,0)
+        pal(0,7)
+        map(1,0,0,0,1,16)
+      elseif polarity == true then
+        rectfill(0,0,8,128,7)
+        pal(7,0)
+        map(0,0,0,0,1,16)
+      end
+    end
+    trigger("polaritylabel",100,polaritylabel())
+
+
+  end
+
+
 end
 __gfx__
 00000000eee7ee7eee7eeeeeeeeeeeeeeeeeeeeeee000eeeee777eeeee0eeeeeee7eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
