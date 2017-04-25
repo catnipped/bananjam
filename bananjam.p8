@@ -205,12 +205,18 @@ end
 
 function update_stars()
 	for star in all(stars) do
-		star.y += star.s
-		if star.y >= 128 then
+    if polarity then star.y -= star.s
+    else star.y += star.s end
+
+		if star.y >= 130 then
 			star.y = 0 - rnd(3)
 			star.x = rnd(128)
 			star.s = rnd(1)
-		end
+		elseif star.y <= -10 then
+      star.y = 128 + rnd(3)
+			star.x = rnd(128)
+			star.s = rnd(1)
+    end
 	end
 end
 
@@ -756,4 +762,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
