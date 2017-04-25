@@ -37,23 +37,6 @@ end
 
 enemies = {}
 e_projectiles = {}
-triggers = {}
--- function trigger(label,d,f)
---   if triggers.label == nil then
---     add(triggers,label = {bool = true, duration = d, func = f})
---   else triggers.label.bool = true end
--- end
---
--- function execute_triggers()
---   for t in all(triggers) do
---     if t.label.bool == true then
---       if frames % t.label.duration == 0 and t.label.bool == true then
---         t.label.bool = false
---       elseif t.label.bool == true then t.label.func() end
---     end
---   end
--- end
-
 progress = 0
 
 function spawn_enemy_by_progress()
@@ -93,6 +76,11 @@ function update_e_projectiles()
   for p in all(e_projectiles) do
     p.x = p.x+p.velocity*sin(p.direction)
     p.y = p.y+p.velocity*cos(p.direction)
+  end
+  for p = #e_projectiles, 1, -1 do
+    local x = e_projectiles[p].x
+    local y = e_projectiles[p].y
+    if x > 120 or x < 8 or y > 128 or y < 0 then del(e_projectiles,e_projectiles[p]) end
   end
 end
 
@@ -217,6 +205,12 @@ function _update60 ()
     if every(30) then add_e_projectile(e.x,e.y,e.polarity) end
 
   end
+  for e = #enemies, 1, -1 do
+    local x = enemies[e].x
+    local y = enemies[e].y
+    if x > 200 or x < -200 or y > 200 or y < -200 then del(enemies,enemies[e]) end
+  end
+
   update_e_projectiles()
   collisions()
 end
@@ -301,9 +295,9 @@ function _draw ()
     end
 
     spr(e.sprite,e.x,e.y)
-    pal()
-  end
 
+  end
+  pal()
 	--ui
   palt(0,false)
   palt(14,true)
@@ -336,8 +330,6 @@ function _draw ()
       end
     end
     -- trigger("polaritylabel",100,polaritylabel())
-
-
   end
 
 
