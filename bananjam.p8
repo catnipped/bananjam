@@ -67,23 +67,23 @@ function update_enemy(e)
       if e.y < 50 then
          e.y += 0.15
       elseif e.x < 64 then
-         enemy.polarity = true
+         e.polarity = true
          e.x -= 1
       else
-         enemy.polarity = true
+         e.polarity = true
          e.x += 1
       end
    elseif e.movement == 3 then
       if e.state == 0 then
-         enemy.polarity = true
+         e.polarity = true
          e.y += 0.25
          if e.y > 64 then
             e.state = 1
          end
       else
-         enemy.polarity = false
+         e.polarity = false
          e.y -= 0.25
-         if e.y < 0 then            
+         if e.y < 0 then
             e.state = 0
          end
       end
@@ -221,6 +221,8 @@ function _init ()
   player.energy = 60
 	player.x = 64
 	player.y = 64
+  player.w = 1
+  player.h = 1
 	player.projectiles = {}
   player.score = 51
 
@@ -257,7 +259,7 @@ function _update60 ()
 
   -- player update
   player_control()
-  player.energy += 0.05
+  player.energy = mid(0,player.energy,120)
   -- shield.x = lerp(shield.x,player.x-4,0.1)
 	-- shield.y = lerp(shield.y,player.y-8,0.5)
 	for n in all(player.projectiles) do
@@ -292,24 +294,37 @@ function _update60 ()
 end
 
 function inside(point, enemy)
-   px = point[1]
-   py = point[2]
+   px = point[1] or point.x
+   py = point[2] or point.y
    return
       px > enemy.x and px < enemy.x + enemy.w * 8 and
       py > enemy.y and py < enemy.y + enemy.h * 8
 end
 
 function collisions()
-   for p in all(player.projectiles) do
+  --laser collison
+   for p = #player.projectiles, 1, -1 do
       for e in all(enemies) do
-         if inside(p, e) then
+         if inside(player.projectiles[p], e) then
             e.hp -= 1
             e.hit = true
             player.score += (player.energy*0.1)
             player.score = flr(player.score)
+            del(player.projectiles,player.projectiles[p])
          end
       end
    end
+  --enemy collisions
+  for p = #e_projectiles, 1, -1 do
+      if inside(e_projectiles[p], player) then
+        if e_projectiles[p].polarity ~= player.polarity then
+          player.energy += e_projectiles[p].size
+        else
+          player.energy -= e_projectiles[p].size*3
+        end
+        del(e_projectiles,e_projectiles[p])
+      end
+  end
 end
 
 function draw_UI()
