@@ -332,6 +332,7 @@ function _draw ()
     -- trigger("polaritylabel",100,polaritylabel())
   end
 
+  print(("CPU".. stat(1)),10,1,14)
 
 end
 __gfx__
