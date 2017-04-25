@@ -158,7 +158,7 @@ function update_e_projectiles()
   for p = #e_projectiles, 1, -1 do
     local x = e_projectiles[p].x
     local y = e_projectiles[p].y
-    if x > 120 or x < 8 or y > 128 or y < 0 then del(e_projectiles,e_projectiles[p]) end
+    if x > 120 or x < 8 or y > 128 or y < 20 then del(e_projectiles,e_projectiles[p]) end
   end
 end
 
@@ -244,7 +244,7 @@ function player_control()
   if btn(3) then player.y += 1 end
   if btn(0) then player.x -= 1 end
   player.x =mid (6,player.x,115)
-  player.y =mid (0,player.y,11562)
+  player.y =mid (0,player.y,120)
 end
 function _update60 ()
 	frames += 1
@@ -310,20 +310,20 @@ end
 function draw_UI()
   palt(0,false)
   palt(14,true)
-	rectfill(0,0,8,128,7)
-	rectfill(127-8,0,128,128,7)
+	rectfill(0,0,4,128,9)
+	rectfill(127-4,0,128,128,9)
   if btn(4) and every(4,0,2) then
     pal(0,7)
     pal(7,0)
   end
-  map(2,0,0,0,1,16)
-  pal()
+
+  -- pal()
   if polarity == true then
-    rectfill(1,1,7,128-player.energy,7)
-    rect(0,0,8,127,0)
+    rectfill(2,129-player.energy,6,121,7)
+    rectfill(1,128-player.energy,5,120,0)
   else
-    rectfill(1,1,7,128-player.energy,0)
-    rect(0,0,8,127,7)
+    rectfill(2,129-player.energy,6,121,0)
+    rectfill(1,128-player.energy,5,120,7)
   end
 
   if btn (5) then
@@ -343,9 +343,20 @@ function draw_UI()
 
   palt(14,true)
   palt(0,false)
-  for n = 7,0,-1 do
+  --
+  local length = "0" .. player.score
+  length = #length -2
+  for n = length,0,-1 do
+
     local nr = sub(player.score, n+1,n+1) or 0
     nr = "0" .. nr
+    if polarity == false then
+      pal(0,7)
+      pal(7,0)
+    elseif polarity == true then
+      pal(0,0)
+      pal(7,7)
+    end
     spr(134+nr,119,n*16,1,2)
   end
 
