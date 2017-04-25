@@ -208,7 +208,9 @@ function _update60 ()
   for e = #enemies, 1, -1 do
     local x = enemies[e].x
     local y = enemies[e].y
-    if x > 200 or x < -200 or y > 200 or y < -200 then del(enemies,enemies[e]) end
+    local hp = enemies[e].hp
+    if x > 200 or x < -200 or y > 200 or y < -200 or hp < 1 then del(enemies,enemies[e]) end
+
   end
 
   update_e_projectiles()
@@ -276,9 +278,8 @@ function _draw ()
 
   --enemies
   for e in all(enemies) do
-    if e.hp <= 0 then
-          -- dont draw when dead, remove this code later
-    elseif e.polarity == true then
+
+    if e.polarity == true then
       pal(0,7)
       pal(7,0)
     end
