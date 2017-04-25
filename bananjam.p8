@@ -143,6 +143,7 @@ function _init ()
 	player.x = 64
 	player.y = 64
 	player.projectiles = {}
+  player.score = 51
 
   polarity = false
 
@@ -213,7 +214,10 @@ function _update60 ()
     local x = enemies[e].x
     local y = enemies[e].y
     local hp = enemies[e].hp
-    if x > 200 or x < -200 or y > 200 or y < -200 or hp < 1 then del(enemies,enemies[e]) end
+    if x > 200 or x < -200 or y > 200 or y < -200 or hp < 1 then
+      del(enemies,enemies[e])
+
+    end
 
   end
 
@@ -235,6 +239,8 @@ function collisions()
          if inside(p, e) then
             e.hp -= 1
             e.hit = true
+            player.score += (player.energy*0.1)
+            player.score = flr(player.score)
          end
       end
    end
@@ -244,7 +250,7 @@ function draw_UI()
   palt(0,false)
   palt(14,true)
 	rectfill(0,0,8,128,7)
-	rectfill(127-8,0,128,128,0)
+	rectfill(127-8,0,128,128,7)
   if btn(4) and every(4,0,2) then
     pal(0,7)
     pal(7,0)
@@ -274,7 +280,15 @@ function draw_UI()
     -- trigger("polaritylabel",100,polaritylabel())
   end
 
-  print(("cpu".. stat(1)),10,1,14)
+  palt(14,true)
+  palt(0,false)
+  for n = 7,0,-1 do
+    local nr = sub(player.score, n+1,n+1) or 0
+    nr = "0" .. nr
+    spr(134+nr,119,n*16,1,2)
+  end
+
+  print(("cpu:".. flr((stat(1)*100)) .. "%"),10,1,14)
 end
 
 function _draw ()
