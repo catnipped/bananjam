@@ -116,7 +116,29 @@ function _update60 ()
     end
   end
 
+  collisions()
 end
+
+function inside(point, enemy)
+   w = 8
+   h = 8
+   px = point[1]
+   py = point[2]
+   return
+      px > enemy.x and px < enemy.x + w and
+      py > enemy.y and py < enemy.y + h
+end
+
+function collisions()
+   for p in all(player.projectiles) do
+      for e in all(enemies) do
+         if inside(p, e) then
+            e.hp -= 3
+         end
+      end
+   end
+end
+
 function _draw ()
   cls()
 	pal()
@@ -155,8 +177,10 @@ function _draw ()
 	-- spr(21,shield.x,shield.y,2,1)
 
   --enemies
-  for e in all(enemies) do
-    if e.polarity == true then
+    for e in all(enemies) do
+       if e.hp <= 0 then
+          -- dont draw when dead, remove this code later
+    elseif e.polarity == true then
       pal(0,7)
       pal(7,0)
       spr(e.sprite,e.x,e.y)
