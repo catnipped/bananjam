@@ -7,6 +7,8 @@ function enemy_base(x, y)
    add(enemies, enemy)
    enemy.x = x
    enemy.y = y
+   enemy.w = 1
+   enemy.h = 1
    enemy.polarity = false
    return enemy
 end
@@ -30,8 +32,10 @@ end
 function create_enemy_destroyer(x, y)
    enemy = enemy_base(x, y)
    enemy.hp = 50
-   enemy.sprite = 65
+   enemy.sprite = 96
    enemy.movement = 2
+   enemy.w = 2
+   enemy.h = 2
    return enemy
 end
 
@@ -218,13 +222,11 @@ function _update60 ()
 end
 
 function inside(point, enemy)
-   w = 8
-   h = 8
    px = point[1]
    py = point[2]
    return
-      px > enemy.x and px < enemy.x + w and
-      py > enemy.y and py < enemy.y + h
+      px > enemy.x and px < enemy.x + enemy.w * 8 and
+      py > enemy.y and py < enemy.y + enemy.h * 8
 end
 
 function collisions()
@@ -295,7 +297,7 @@ function _draw ()
       e.hit = false
     end
 
-    spr(e.sprite,e.x,e.y)
+    spr(e.sprite,e.x,e.y,e.w,e.h)
 
   end
   pal()
