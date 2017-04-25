@@ -131,7 +131,7 @@ function spawn_enemy_by_progress()
    elseif r == 2 then
       create_enemy_destroyer(x, y)
    elseif r == 3 then
-      create_enemy_peeper(x, y)      
+      create_enemy_peeper(x, y)
    end
 end
 
@@ -182,11 +182,11 @@ end
 
 function init_stars()
 	stars = {}
-		for i=1,50 do
+		for i=1,20 do
 			add(stars, {
 				x = rnd(128),
 				y = rnd(128),
-				s = rnd(1) + 1.5
+				s = rnd(1)
 			})
 		end
 end
@@ -197,7 +197,7 @@ function update_stars()
 		if star.y >= 128 then
 			star.y = 0 - rnd(3)
 			star.x = rnd(128)
-			star.s = rnd(1) + 1.5
+			star.s = rnd(1)
 		end
 	end
 end
@@ -275,7 +275,7 @@ function _update60 ()
     for e in all(enemies) do
        update_enemy(e)
     end
-    
+
   for e = #enemies, 1, -1 do
     local x = enemies[e].x
     local y = enemies[e].y
@@ -730,4 +730,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
