@@ -238,7 +238,7 @@ end
 
 function player_control()
   if btn(4) and player.energy > 0 then
-    add(player.projectiles,{player.x+3, player.y})
+    add(player.projectiles,{x = player.x+3, y = player.y})
     player.energy -= 0.1
   end
   if btnp(5) then
@@ -262,10 +262,10 @@ function _update60 ()
   player.energy = mid(0,player.energy,120)
   -- shield.x = lerp(shield.x,player.x-4,0.1)
 	-- shield.y = lerp(shield.y,player.y-8,0.5)
-	for n in all(player.projectiles) do
-		n[2] -= 5
-    n[1] = player.x+3
-		if n[2] < 00 then del(player.projectiles,player.projectiles[1]) end
+	for n = #player.projectiles, 1, -1 do
+		player.projectiles[n].y -= 5
+    player.projectiles[n].x = player.x+3
+		if player.projectiles[n].y < -30 then del(player.projectiles,player.projectiles[1]) end
 	end
 
     --enemies
@@ -294,8 +294,8 @@ function _update60 ()
 end
 
 function inside(point, enemy)
-   local px = point[1] or point.x
-   local py = point[2] or point.y
+   local px = point.x
+   local py = point.y
    return
       px > enemy.x and px < enemy.x + enemy.w * 8 and
       py > enemy.y and py < enemy.y + enemy.h * 8
@@ -310,7 +310,6 @@ function collisions()
             e.hit = true
             player.score += (player.energy*0.1)
             player.score = flr(player.score)
-            del(player.projectiles,player.projectiles[p])
          end
       end
    end
@@ -319,7 +318,7 @@ function collisions()
       if inside(e_projectiles[p], player) then
         if e_projectiles[p].polarity ~= player.polarity then
           player.energy += e_projectiles[p].size
-        else
+        elseif e_projectiles[p].polarity == player.polarity then
           player.energy -= e_projectiles[p].size*3
         end
         del(e_projectiles,e_projectiles[p])
@@ -400,9 +399,10 @@ function _draw ()
   else draw_stars() end
 
   --projectiles
-  for n in all(player.projectiles) do
-    if polarity == true then line(n[1],n[2],n[1],n[2]+5,0)
-    else line(n[1],n[2],n[1],n[2]+5,7) end
+  for i = #player.projectiles, 1, -1 do
+    n = player.projectiles[i]
+    if polarity == true then line(n.x,n.y,n.x,n.y+5,0)
+    else line(n.x,n.y,n.x,n.y+5,7) end
   end
   draw_e_projectiles()
 
