@@ -332,6 +332,9 @@ function update_game()
 
   update_e_projectiles()
   collisions()
+  if player.energy < 0 then
+    _init()
+  end
   player.energy = mid(0,player.energy,100)
 end
 
