@@ -54,6 +54,21 @@ function create_enemy_peeper(x, y)
    return enemy
 end
 
+function create_enemy_longship(x, y)
+   local enemy = enemy_base(x, y)
+   enemy.hp = 30
+   enemy.sprite = 68
+   enemy.movement = 2
+   enemy.state = 0
+   enemy.shotpattern = 4
+   enemy.w = 1
+   enemy.h = 4
+   if rnd(100) > 50 then
+      enemy.polarity = true
+   end
+   return enemy
+end
+
 function update_enemy(e)
    if e.movement == 0 then
       -- move back and forth across the whole screen
@@ -118,6 +133,14 @@ function update_enemy(e)
       if every(20) then
          add_e_projectile(gun_x, gun_y, e.polarity, 0, 2.0)
       end
+   elseif e.shotpattern == 4 then
+      if every(100) then
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.0)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.5)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.0)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.5)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 4.0)
+      end
    end
 
    --collision with player
@@ -133,18 +156,21 @@ e_projectiles = {}
 progress = 0
 
 function spawn_enemy_by_progress()
-   local r = flr(rnd(4))
-   local x = 20 + rnd(128 - 40)
-   local y = -16
+   local r = flr(rnd(5))
+   local x = (2 + flr(rnd(12))) * 8 -- even sectors
+   local e = nil
    if r == 0 then
-      create_enemy_simple(x, y)
+      e = create_enemy_simple(x, y)
    elseif r == 1 then
-      create_enemy_grunt(x, y)
+      e = create_enemy_grunt(x, y)
    elseif r == 2 then
-      create_enemy_destroyer(x, y)
+      e = create_enemy_destroyer(x, y)
    elseif r == 3 then
-      create_enemy_peeper(x, y)
+      e = create_enemy_peeper(x, y)
+   elseif r == 4 then
+      e = create_enemy_longship(x, y)
    end
+   e.y = e.h * -8 -- start just outside the level
 end
 
 function lerp(a,b,t)
