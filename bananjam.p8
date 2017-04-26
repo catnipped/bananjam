@@ -13,6 +13,7 @@ function enemy_base(x, y)
    enemy.movement = 0
    enemy.shotpattern = 0
    enemy.score = 1
+   enemy.gunoffset = { x = 0, y = 0 }
    return enemy
 end
 
@@ -51,6 +52,36 @@ function create_enemy_peeper(x, y)
    enemy.movement = 3
    enemy.state = 0
    enemy.shotpattern = 1
+   enemy.flip = true
+   return enemy
+end
+
+function create_enemy_longship(x, y)
+   local enemy = enemy_base(x, y)
+   enemy.hp = 30
+   enemy.sprite = 68
+   enemy.movement = 2
+   enemy.shotpattern = 4
+   enemy.w = 1
+   enemy.h = 4
+   if rnd(100) > 50 then
+      enemy.polarity = true
+   end
+   return enemy
+end
+
+function create_enemy_stone(x, y)
+   local enemy = enemy_base(x, y)
+   enemy.hp = 500
+   enemy.sprite = 69
+   enemy.movement = 1
+   enemy.shotpattern = 5
+   enemy.w = 2
+   enemy.h = 2
+   enemy.gunoffset.y -= 10
+   if rnd(100) > 50 then
+      enemy.polarity = true
+   end
    return enemy
 end
 
@@ -94,37 +125,57 @@ function update_enemy(e)
       end
    end
 
-   gun_x = e.x + e.w * 4
-   gun_y = e.y + e.h * 8
+   gun_x = e.x + e.w * 4 + e.gunoffset.x
+   gun_y = e.y + e.h * 8 + e.gunoffset.y
 
    if e.shotpattern == 0 then
+      -- Simple shots going downwards
       if every(30) then
          add_e_projectile(gun_x, gun_y, e.polarity)
       end
    elseif e.shotpattern == 1 then
+      -- Shot every second shot on/off in a diagonal line
       if e.x > 64 then
          dir = 0.15
       else
          dir = -0.15
       end
-      if every(15) then add_e_projectile(gun_x, gun_y, e.polarity, dir) end
+      if e.flip then e.flip = false else e.flip = true end
+      if every(20) then add_e_projectile(gun_x, gun_y, e.flip, dir) end
    elseif e.shotpattern == 2 then
+      -- Bursts of three shots in a triangle shape
       if every(60) then
          add_e_projectile(gun_x, gun_y, e.polarity, 0, 1.0)
          add_e_projectile(gun_x, gun_y, e.polarity, 0.05, 0.8)
          add_e_projectile(gun_x, gun_y, e.polarity, -0.05, 0.8)
       end
    elseif e.shotpattern == 3 then
-      if every(20) then
+      -- Fast shots
+      if every(15) then
          add_e_projectile(gun_x, gun_y, e.polarity, 0, 2.0)
       end
+   elseif e.shotpattern == 4 then
+      -- Bursts of a lot of shots going almost straight forward
+      if every(100) then
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.0)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.5)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.0)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.5)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 4.0)
+      end
+   elseif e.shotpattern == 5 then
+      -- Shot all directions
+      if every(120) then
+         for angle = 0.0, 1.0, 0.1 do
+            add_e_projectile(gun_x, gun_y, e.polarity, angle, rnd(1.0) + 0.5)
+         end
+      end      
    end
 
    --collision with player
    if inside(player, e) then
      e.hit = true
      player.energy -= 1
-     player.hit += 0.7+rnd(1)
      e.hp -= 5
    end
 end
@@ -134,7 +185,7 @@ e_projectiles = {}
 progress = 0
 
 function spawn_enemy_by_progress()
-   local r = flr(rnd(4))
+   local r = flr(rnd(6))
    local x = 20 + rnd(128 - 40)
    local y = -16
    if r == 0 then
@@ -145,6 +196,10 @@ function spawn_enemy_by_progress()
       create_enemy_destroyer(x, y)
    elseif r == 3 then
       create_enemy_peeper(x, y)
+   elseif r == 4 then
+      create_enemy_longship(x, y)
+   elseif r == 5 then
+      create_enemy_stone(x, y)
    end
 end
 
