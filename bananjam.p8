@@ -135,13 +135,15 @@ function update_enemy(e)
       end
    elseif e.shotpattern == 1 then
       -- Shot every second shot on/off in a diagonal line
-      if e.x > 64 then
-         dir = 0.15
-      else
-         dir = -0.15
+      if every(20) then
+         if e.x > 64 then
+            dir = 0.15
+         else
+            dir = -0.15
+         end
+         e.flip = not e.flip
+         add_e_projectile(gun_x, gun_y, e.flip, dir)
       end
-      if e.flip then e.flip = false else e.flip = true end
-      if every(20) then add_e_projectile(gun_x, gun_y, e.flip, dir) end
    elseif e.shotpattern == 2 then
       -- Bursts of three shots in a triangle shape
       if every(60) then
