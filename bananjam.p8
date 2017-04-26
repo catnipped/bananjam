@@ -16,14 +16,14 @@ function enemy_base(x, y)
 end
 
 function create_enemy_simple(x, y)
-   enemy = enemy_base(x, y)
+   local enemy = enemy_base(x, y)
    enemy.hp = 20
    enemy.sprite = 32
    return enemy
 end
 
 function create_enemy_grunt(x, y)
-   enemy = enemy_base(x, y)
+   local enemy = enemy_base(x, y)
    enemy.hp = 30
    enemy.sprite = 64
    enemy.movement = 1
@@ -32,7 +32,7 @@ function create_enemy_grunt(x, y)
 end
 
 function create_enemy_destroyer(x, y)
-   enemy = enemy_base(x, y)
+   local enemy = enemy_base(x, y)
    enemy.hp = 150
    enemy.sprite = 96
    enemy.movement = 2
@@ -44,7 +44,7 @@ function create_enemy_destroyer(x, y)
 end
 
 function create_enemy_peeper(x, y)
-   enemy = enemy_base(x, y)
+   local enemy = enemy_base(x, y)
    enemy.hp = 30
    enemy.sprite = 67
    enemy.movement = 3
@@ -55,15 +55,18 @@ end
 
 function update_enemy(e)
    if e.movement == 0 then
+      -- Move back and forth across the whole screen
       if e.polarity == false then e.x += 0.5
       elseif e.polarity == true then e.x -= 0.5 end
       if e.x > 100 then e.polarity = true
       elseif e.x < 15 then e.polarity = false end
       e.y += 0.1
    elseif e.movement == 1 then
+      -- Move like a snake
       e.x += sin(e.y / 50) * 0.5
       e.y += 0.25
    elseif e.movement == 2 then
+      -- Move down, then out to the side
       if e.y < 50 then
          e.y += 0.15
       elseif e.x < 64 then
@@ -74,6 +77,7 @@ function update_enemy(e)
          e.x += 1
       end
    elseif e.movement == 3 then
+      -- Move down, then up, repeat
       if e.state == 0 then
          e.polarity = true
          e.y += 0.25
