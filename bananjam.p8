@@ -58,7 +58,7 @@ end
 
 function create_enemy_longship(x, y)
    local enemy = enemy_base(x, y)
-   enemy.hp = 30
+   enemy.hp = 200
    enemy.sprite = 68
    enemy.movement = 2
    enemy.shotpattern = 4
