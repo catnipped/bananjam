@@ -171,7 +171,7 @@ function update_enemy(e)
          for angle = 0.0, 1.0, 0.1 do
             add_e_projectile(gun_x, gun_y, e.polarity, angle, rnd(1.0) + 0.5)
          end
-      end      
+      end
    end
 
    --collision with player
@@ -379,8 +379,10 @@ function update_game()
     elseif hp < 1 then
       if player.energy <= 20 then
         player.score += 2*(enemies[e].score * (100 - player.energy))
+
       else
         player.score += (enemies[e].score * (100 - player.energy))
+
       end
       del(enemies,enemies[e])
     end
@@ -456,11 +458,13 @@ function draw_title()
   map(2,0,0,16,1,12)
   local sine = sin((frames/1000)*3.14)*7
   local sine2 = sin((frames/700)*3.14)*4
-  if every(240,0,100+rnd(40)) then
+  if every(480,0,200+rnd(80)) then
     pal(7,7) pal(0,0)
     spr(128,38+sine2,32+sine,6,8)
-  elseif every(240,120,100+rnd(40)) then
+    polarity = false
+  elseif every(480,240,200+rnd(80)) then
     spr(128,38+sine2,32+sine,6,8)
+    polarity = true
   end
 end
 
@@ -929,4 +933,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
