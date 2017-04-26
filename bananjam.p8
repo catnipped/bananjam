@@ -51,6 +51,7 @@ function create_enemy_peeper(x, y)
    enemy.movement = 3
    enemy.state = 0
    enemy.shotpattern = 1
+   enemy.flip = True
    return enemy
 end
 
@@ -113,27 +114,33 @@ function update_enemy(e)
    gun_y = e.y + e.h * 8
 
    if e.shotpattern == 0 then
+      -- Simple shots going downwards
       if every(30) then
          add_e_projectile(gun_x, gun_y, e.polarity)
       end
    elseif e.shotpattern == 1 then
+      -- Shot every second shot on/off in a diagonal line
       if e.x > 64 then
          dir = 0.15
       else
          dir = -0.15
       end
-      if every(15) then add_e_projectile(gun_x, gun_y, e.polarity, dir) end
+      if every(20) then add_e_projectile(gun_x, gun_y, e.flip, dir) end
+      e.flip = not e.flip
    elseif e.shotpattern == 2 then
+      -- Bursts of three shots in a triangle shape
       if every(60) then
          add_e_projectile(gun_x, gun_y, e.polarity, 0, 1.0)
          add_e_projectile(gun_x, gun_y, e.polarity, 0.05, 0.8)
          add_e_projectile(gun_x, gun_y, e.polarity, -0.05, 0.8)
       end
    elseif e.shotpattern == 3 then
-      if every(20) then
+      -- Fast shots
+      if every(15) then
          add_e_projectile(gun_x, gun_y, e.polarity, 0, 2.0)
       end
    elseif e.shotpattern == 4 then
+      -- Bursts of a lot of shots going almost straight forward
       if every(100) then
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.0)
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.5)
