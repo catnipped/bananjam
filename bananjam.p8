@@ -286,8 +286,8 @@ function _update60 ()
 
   -- player update
   player_control()
-  player.energy = mid(0,player.energy,120)
-  player.score = flr(player.score)
+
+
   -- shield.x = lerp(shield.x,player.x-4,0.1)
 	-- shield.y = lerp(shield.y,player.y-8,0.5)
 	for n = #player.projectiles, 1, -1 do
@@ -314,7 +314,11 @@ function _update60 ()
       del(enemies,enemies[e])
 
     elseif hp < 1 then
-      player.score += (enemies[e].score * (100 - player.energy))
+      if player.energy <= 20 then
+        player.score += 2*(enemies[e].score * (100 - player.energy))
+      else
+        player.score += (enemies[e].score * (100 - player.energy))
+      end
       del(enemies,enemies[e])
     end
 
@@ -322,6 +326,7 @@ function _update60 ()
 
   update_e_projectiles()
   collisions()
+  player.energy = mid(0,player.energy,100)
 end
 
 function inside(point, enemy)
@@ -339,6 +344,7 @@ function collisions()
          if inside(player.projectiles[p], e) then
             e.hp -= 1
             e.hit = true
+            if (every(4)) player.score += 1
          end
       end
    end
@@ -423,6 +429,7 @@ function draw_ui()
   palt(14,true)
   palt(0,false)
   --
+  player.score = flr(player.score)
   local length = "0" .. player.score
   length = #length -2
   for n = length,0,-1 do
