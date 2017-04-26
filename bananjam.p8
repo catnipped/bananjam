@@ -12,6 +12,7 @@ function enemy_base(x, y)
    enemy.polarity = false
    enemy.movement = 0
    enemy.shotpattern = 0
+   enemy.score = 1
    return enemy
 end
 
@@ -60,7 +61,7 @@ function update_enemy(e)
       elseif e.polarity == true then e.x -= 0.5 end
       if e.x > 100 then e.polarity = true
       elseif e.x < 15 then e.polarity = false end
-      e.y += 0.1
+      e.y += 0.2
    elseif e.movement == 1 then
       -- move like a snake
       e.x += sin(e.y / 50) * 0.5
@@ -117,6 +118,13 @@ function update_enemy(e)
       if every(20) then
          add_e_projectile(gun_x, gun_y, e.polarity, 0, 2.0)
       end
+   end
+
+   --collision with player
+   if inside(player, e) then
+     e.hit = true
+     player.energy -= 1
+     e.hp -= 5
    end
 end
 
@@ -227,8 +235,8 @@ end
 function draw_stars()
 	for star in all(stars) do
 		if (star.y > 0) then
-			rectfill(star.x-1, star.y-1, star.x+1, (star.y+star.s)+1, 0)
-			line(star.x, star.y, star.x, star.y+star.s, (5+rnd(2)))
+			-- rectfill(star.x-1, star.y-1, star.x+1, (star.y+star.s)+1, 0)
+			line(star.x, star.y, star.x, star.y+(star.s*2), (5+rnd(2)))
 		end
 	end
 end
@@ -245,8 +253,9 @@ function _init ()
 	player.y = 64
   player.w = 1
   player.h = 1
+  player.hit = 0
 	player.projectiles = {}
-  player.score = 51
+  player.score = 0
 
   polarity = false
 
@@ -272,7 +281,7 @@ function player_control()
   if btn(1) then player.x += 1 end
   if btn(3) then player.y += 1 end
   if btn(0) then player.x -= 1 end
-  player.x =mid (6,player.x,115)
+  player.x =mid (3,player.x,118)
   player.y =mid (0,player.y,120)
 end
 function _update60 ()
@@ -281,7 +290,8 @@ function _update60 ()
 
   -- player update
   player_control()
-  player.energy = mid(0,player.energy,120)
+
+
   -- shield.x = lerp(shield.x,player.x-4,0.1)
 	-- shield.y = lerp(shield.y,player.y-8,0.5)
 	for n = #player.projectiles, 1, -1 do
@@ -304,15 +314,23 @@ function _update60 ()
     local x = enemies[e].x
     local y = enemies[e].y
     local hp = enemies[e].hp
-    if x > 200 or x < -200 or y > 200 or y < -200 or hp < 1 then
+    if x > 200 or x < -200 or y > 200 or y < -200 then
       del(enemies,enemies[e])
 
+    elseif hp < 1 then
+      if player.energy <= 20 then
+        player.score += 2*(enemies[e].score * (100 - player.energy))
+      else
+        player.score += (enemies[e].score * (100 - player.energy))
+      end
+      del(enemies,enemies[e])
     end
 
   end
 
   update_e_projectiles()
   collisions()
+  player.energy = mid(0,player.energy,100)
 end
 
 function inside(point, enemy)
@@ -330,8 +348,7 @@ function collisions()
          if inside(player.projectiles[p], e) then
             e.hp -= 1
             e.hit = true
-            player.score += (player.energy*0.1)
-            player.score = flr(player.score)
+            if (every(4)) player.score += 1
          end
       end
    end
@@ -340,8 +357,10 @@ function collisions()
       if inside(e_projectiles[p], player) then
         if e_projectiles[p].polarity ~= polarity then
           player.energy += 5
+          player.score += 1
         elseif e_projectiles[p].polarity == polarity then
           player.energy -= 10
+          player.hit += 2
         end
         del(e_projectiles,e_projectiles[p])
       end
@@ -351,6 +370,39 @@ end
 function draw_ui()
   palt(0,false)
   palt(14,true)
+
+  if btnp (5) then --glitch effect from mr.beam
+    for x = 0,128 do
+      for y = 0,128 do
+        if flr(rnd(2)) == 0 then
+          pset(x,y,0)
+        else
+          pset(x,y,7)
+        end
+      end
+    end
+  end
+
+  -- if pok then
+  --   pok*=0.9
+  --
+  --   gf=function() return 0x6000+flr(rnd(6000)) end
+  --
+  --   f=gf()
+  --   memcpy(f,f+8*pok,100)
+  --   f=flr(rnd(600))
+  --   if(flr(rnd(8))==0) memcpy(0x6000+f,0x6000+f+flr(rnd(3))*pok,100)
+  --
+  --   cs=cos((frames%60)/60)
+  --   cs*=pok
+  --   for i=0,100 do
+  --     b=0x6000+i*80
+  --     c=i/100
+  --     le=70
+  --     memcpy(b,b+i%(1+cs),le)
+  --   end
+  -- end
+
 	rectfill(0,0,4,128,9)
 	rectfill(127-4,0,128,128,9)
   if btn(4) and every(4,0,2) then
@@ -358,7 +410,6 @@ function draw_ui()
     pal(7,0)
   end
 
-  -- pal()
   if polarity == true then
     rectfill(2,121-player.energy,6,121,7)
     rectfill(1,120-player.energy,5,120,0)
@@ -367,24 +418,22 @@ function draw_ui()
     rectfill(1,120-player.energy,5,120,7)
   end
 
-  if btn (5) then
-    function polaritylabel()
-      if polarity == false then
-        rectfill(0,0,8,128,0)
-        pal(0,7)
-        map(1,0,0,0,1,16)
-      elseif polarity == true then
-        rectfill(0,0,8,128,7)
-        pal(7,0)
-        map(0,0,0,0,1,16)
-      end
-    end
-    -- trigger("polaritylabel",100,polaritylabel())
-  end
 
+  -- function polaritylabel()
+  --   if polarity == false then
+  --     rectfill(0,0,8,128,0)
+  --     pal(0,7)
+  --     map(1,0,0,0,1,16)
+  --   elseif polarity == true then
+  --     rectfill(0,0,8,128,7)
+  --     pal(7,0)
+  --     map(0,0,0,0,1,16)
+  --   end
+  -- end
   palt(14,true)
   palt(0,false)
   --
+  player.score = flr(player.score)
   local length = "0" .. player.score
   length = #length -2
   for n = length,0,-1 do
@@ -401,7 +450,7 @@ function draw_ui()
     spr(134+nr,119,n*16,1,2)
   end
 
-  print(("cpu:".. flr((stat(1)*100)) .. "%"),10,1,14)
+  print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) ),10,1,14)
 end
 
 function _draw ()
@@ -428,20 +477,8 @@ function _draw ()
   end
   draw_e_projectiles()
 
-	--player
-  local ship_sprite = 5
-  local ship_sprite_turning = 39
 
-  if polarity == true then
-    ship_sprite = 6
-    ship_sprite_turning = 40
-  end
 
-	if btn(0) then spr(ship_sprite_turning,player.x-1,player.y)
-	elseif btn(1) then spr(ship_sprite_turning,player.x,player.y,1,1,true)
-	else spr(ship_sprite,player.x,player.y) end
-
-	-- spr(21,shield.x,shield.y,2,1)
 
   --enemies
   for e in all(enemies) do
@@ -466,52 +503,67 @@ function _draw ()
 
   end
   pal()
+  palt(0,false)
+  palt(14,true)
+  --player
+  local ship_sprite = 5
+  local ship_sprite_turning = 39
+
+  if polarity == true then
+    ship_sprite = 6
+    ship_sprite_turning = 40
+  end
+
+  if btn(0) then spr(ship_sprite_turning,player.x-1,player.y)
+  elseif btn(1) then spr(ship_sprite_turning,player.x,player.y,1,1,true)
+  else spr(ship_sprite,player.x,player.y) end
+
 
 
   draw_ui()
 
 end
 __gfx__
-00000000eee7ee7eee7eeeeeeeeeeeeeeeeeeeeeee000eeeee777eeeee0eeeeeee7eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-00000000ee7eeee7e7eeee7ee7ee7eeeeee7ee7ee07770eee70007eee070eeeee777eeeee0e00e00e0eeeee0eee00eeee0000000e0000000e0000000e00ee00e
-007007007e7e7ee7ee7eeee7ee77eeeeeeee77ee0770770e7007007e07000eee77007eeee0e00e00e0eeeee0eee00eeee7770700e0077777e00eeee0e00ee00e
-0007700007eee7ee7e7e7ee7e7eeeeeeee7eee7e0077700e7700077ee000eeeee707eeeee0e00e00e0eeeee0eee00eeeeeee0e00e00eeeeee00eeee0e00ee00e
-000770007707e7070700e77007ee7eeeeee7ee700707070e7070707eee0eeeeeee7eeeeee0e00e00e0eeeee0eee00eeeeeee0e77e00eeeeee00eeee0e00ee00e
+00000000eee7ee7eee7eeeeeeeeeeeeeeeeeeeeeee000eeeee777eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+00000000ee7eeee7e7eeee7ee7ee7eeeeee7ee7ee07770eee70007eeeeeeeeeeeeeeeeeee0e00e00e0eeeee0eee00eeee0000000e0000000e0000000e00ee00e
+007007007e7e7ee7ee7eeee7ee77eeeeeeee77ee0770770e7007007eeeeeeeeeeeeeeeeee0e00e00e0eeeee0eee00eeee7770700e0077777e00eeee0e00ee00e
+0007700007eee7ee7e7e7ee7e7eeeeeeee7eee7e0077700e7700077eeeeeeeeeeeeeeeeee0e00e00e0eeeee0eee00eeeeeee0e00e00eeeeee00eeee0e00ee00e
+000770007707e7070700e77007ee7eeeeee7ee700707070e7070707eeeeeeeeeeeeeeeeee0e00e00e0eeeee0eee00eeeeeee0e77e00eeeeee00eeee0e00ee00e
 00700700007700777077007770eee7eeee77e0070777770e7000007eeeeeeeeeeeeeeeeee0e00e00e0eeeee0eee00eeeeeee0eeee00eeeeee00eeee0e00ee00e
 00000000ee0077000e00770007077eeee7ee77700700070e0077700eeeeeeeeeeeeeeeeee0e00e00e0eeeee0eee00eeeeeee0eeee00eeeeee00eeee0e00ee07e
 00000000eeee00eeeeee00eee070eeeeeeee070e070e070e07eee70eeeeeeeeeeeeeeeeee0e00e00e0000000eee70eeeeeee0eeee0000000e00eeee0e0000000
-00000000ee00eeeeee00eeeee070eeeeeeee070eeeeeeeeeeeeeeeeee7eeeeeee0eeeeeee0e70e70e0077770eeee0eeeeeee00eee0077000e07eeee0e0077770
-00000000007700ee007700e00777ee7ee7e77070eeeee00000eeeeeee7eeeeeee0eeeeeee0ee0ee0e00eeee0eeee0eeeeeee00eee00ee777e0eeeee0e00eeee0
-000000007700770077007707700e77eeee7ee077eee007777700eeeee7eeeeeee0eeeeeee0ee0ee0e00eeee0eeee0eeeeeee00eee00eeeeee0eeeee0e00eeee0
-00000000707e7077077e007007ee7eeeee7eee70ee07700000770eee070eeeee707eeeeee0ee0ee0e00eeee0eeee0eeeeeee00eee00eeeeee0eeeee0e00eeee0
-000000000e7eee7e7ee7e707e7eee7eee7ee77eee0700eeeee0070eee0eeeeeee7eeeeeee0000000e00eeee0ee00000eeeee00eee0000000e0000000e00eeee0
+00000000ee00eeeeee00eeeee070eeeeeeee070eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0e70e70e0077770eeee0eeeeeee00eee0077000e07eeee0e0077770
+00000000007700ee007700e00777ee7ee7e77070eeeee00000eeeeeeeeeeeeeeeeeeeeeee0ee0ee0e00eeee0eeee0eeeeeee00eee00ee777e0eeeee0e00eeee0
+000000007700770077007707700e77eeee7ee077eee007777700eeeeeeeeeeeeeeeeeeeee0ee0ee0e00eeee0eeee0eeeeeee00eee00eeeeee0eeeee0e00eeee0
+00000000707e7077077e007007ee7eeeee7eee70ee07700000770eeeeeeeeeeeeeeeeeeee0ee0ee0e00eeee0eeee0eeeeeee00eee00eeeeee0eeeee0e00eeee0
+000000000e7eee7e7ee7e707e7eee7eee7ee77eee0700eeeee0070eeeeeeeeeeeeeeeeeee0000000e00eeee0ee00000eeeee00eee0000000e0000000e00eeee0
 000000007ee7e7e77eeee7eeee77eeeeeee7e7ee0700eeeeeee0070eeeeeeeeeeeeeeeeee0000000e00eeee0ee00000eeeee00eee0000000e0000000e00eeee0
 000000007eeee7eee7eeee7ee7ee7eeeeeeeee7e070eeeeeeeee070eeeeeeeeeeeeeeeeee7777777e77eeee7ee77777eeeee77eee7777777e7777777e77eeee7
 00000000e7ee7eeeeeeee7eeeeeeeeeeeeeeeeee000eeeeeeeee000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e00ee00ee777777e000000000000000000000000eeeeeeeeeeeeeeeeeeee00eeeeee77eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0777770700070007
-e070070e70000007000000000000000000000000eeeee77777eeeeeeeee0770eeee7007ee00eeeeee000000ee0000000e0000000eeeeeeee0007700007070000
-e078870e70700707000000000000000000000000eee770000077eeeeee070770ee707007e00eeeeee007770ee0077700e0077000eeeeeeee7700777707077007
-0778877070000007000000000000000000000000ee70077777007eeeee007700ee770077e00eeeeee00eee0ee00eee00e00ee777eeee7eee0007770077007000
-0070070070707077000000000000000000000000e7077eeeee7707eeee070770ee707007e00eeeeee00eee0ee00eee70e00eeeeeeee707ee0707070707777000
-07700770770707070000000000000000000000007077eeeeeee7707eee077770ee700007e00eeeeee00eee0ee00eeee0e00eeeeeeee707ee7777000000700000
-070ee070e7000007000000000000000000000000707eeeeeeeee707eee070070ee007700e00eeeeee00eee0ee00eeee0e00eeeeeee70007e0707777077770707
-e0eeee0ee777777e000000000000000000000000777eeeeeeeee777eee070e70ee077e70e07eeeeee0000000e0000000e00eeeeee70000077700700070700700
-000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee0077770e0077000e07eeeeeee70007e7070700077007000
-000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee00eeee0e00ee770e0eeeeeeeee707ee0070007007007077
-000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee00eeee0e00eeee0e0eeeeeeeee707ee7077707077000000
-000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee00eeee0e00eeee0e0eeeeeeeeee7eee7000007700007700
-000000000000000000000000000000000000000000000000000000000000000000000000e0000000e0000000e00eeee0e0000000eeeeeeee0007707007707000
-000000000000000000000000000000000000000000000000000000000000000000000000e0000000e0000000e00eeee0e0000000eeeeeeee7000000077007777
-000000000000000000000000000000000000000000000000000000000000000000000000e7777777e7777777e77eeee7e7777777eeeeeeee7070770700000000
-000000000000000000000000000000000000000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0070070707777707
-eee88eeeee8888ee00000000ee8888ee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-ee8888eeee8778ee00000000eeeee88e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-8e0880e8ee8008ee00000000e8e8ee8e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-80700708ee8778ee00000000e8888e8e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-e880088eee8008ee000000008787888e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-80800808ee8778ee000000008808888e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-80000008ee8008ee00000000e888888e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-e88ee88eeee88eee00000000e8e8ee8e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e00ee00e07777707000700070007007777007000eeeeeeeeeeeeeeeeeeee00eeeeee77eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e070070e00077000070700000777707007007077eeeee77777eeeeeeeee0770eeee7007ee00eeeeee000000ee0000000e0000000eeeeeeeeeeeeeeeeeeeeeeee
+e078870e77007777070770070000777777000000eee770000077eeeeee070770ee707007e00eeeeee007770ee0077700e0077000eeeeeeeeeeeeeeeeeeeeeeee
+0778877000077700770070007770007000007700ee70077777007eeeee007700ee770077e00eeeeee00eee0ee00eee00e00ee777eeee7eeeeeeeeeeeeeeeeeee
+0070070007070707077770000077000007707000e7077eeeee7707eeee070770ee707007e00eeeeee00eee0ee00eee70e00eeeeeeee707eeeeeeeeeeeeeeeeee
+07700770777700000070000077700777770077777077eeeeeee7707eee077770ee700007e00eeeeee00eee0ee00eeee0e00eeeeeeee707eeeeeeeeeeeeeeeeee
+070ee07007077770777707070000070000000000707eeeeeeeee707eee070070ee007700e00eeeeee00eee0ee00eeee0e00eeeeeee70007eeeeeeeeeeeeeeeee
+e0eeee0e77007000707007007077077007777707777eeeeeeeee777eee070e70ee077e70e07eeeeee0000000e0000000e00eeeeee7000007eeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee0077770e0077000e07eeeeeee70007eeeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee00eeee0e00ee770e0eeeeeeeee707eeeeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee00eeee0e00eeee0e0eeeeeeeee707eeeeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000e0eeeeeee00eeee0e00eeee0e0eeeeeeeeee7eeeeeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000e0000000e0000000e00eeee0e0000000eeeeeeeeeeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000e0000000e0000000e00eeee0e0000000eeeeeeeeeeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000e7777777e7777777e77eeee7e7777777eeeeeeeeeeeeeeeeeeeeeeee
+000000000000000000000000000000000000000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eee88eeeee8888ee00000000ee888eee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+ee8888eeee8778ee00000000e8eee88e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e0880e8ee8008ee00000000e88eee8e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+80700708ee8778ee00000000eeeeee8e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e880088eee8008ee00000000e7e7888e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+80800808ee8778ee00000000e808888e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+80000008ee8008ee00000000ee88888e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e88ee88eeee88eee00000000eee8ee8e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
