@@ -13,6 +13,7 @@ function enemy_base(x, y)
    enemy.movement = 0
    enemy.shotpattern = 0
    enemy.score = 1
+   enemy.gunoffset = { x = 0, y = 0 }
    return enemy
 end
 
@@ -60,10 +61,24 @@ function create_enemy_longship(x, y)
    enemy.hp = 30
    enemy.sprite = 68
    enemy.movement = 2
-   enemy.state = 0
    enemy.shotpattern = 4
    enemy.w = 1
    enemy.h = 4
+   if rnd(100) > 50 then
+      enemy.polarity = true
+   end
+   return enemy
+end
+
+function create_enemy_stone(x, y)
+   local enemy = enemy_base(x, y)
+   enemy.hp = 30
+   enemy.sprite = 69
+   enemy.movement = 1
+   enemy.shotpattern = 5
+   enemy.w = 2
+   enemy.h = 2
+   enemy.gunoffset.y -= 10
    if rnd(100) > 50 then
       enemy.polarity = true
    end
@@ -110,8 +125,8 @@ function update_enemy(e)
       end
    end
 
-   gun_x = e.x + e.w * 4
-   gun_y = e.y + e.h * 8
+   gun_x = e.x + e.w * 4 + e.gunoffset.x
+   gun_y = e.y + e.h * 8 + e.gunoffset.y
 
    if e.shotpattern == 0 then
       -- Simple shots going downwards
@@ -148,6 +163,13 @@ function update_enemy(e)
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.5)
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 4.0)
       end
+   elseif e.shotpattern == 5 then
+      -- Shot all directions
+      if every(120) then
+         for angle = 0.0, 1.0, 0.1 do
+            add_e_projectile(gun_x, gun_y, e.polarity, angle, rnd(1.0) + 0.5)
+         end
+      end      
    end
 
    --collision with player
@@ -163,7 +185,7 @@ e_projectiles = {}
 progress = 0
 
 function spawn_enemy_by_progress()
-   local r = flr(rnd(5))
+   local r = flr(rnd(6))
    local x = (2 + flr(rnd(12))) * 8 -- even sectors
    local e = nil
    if r == 0 then
@@ -176,6 +198,8 @@ function spawn_enemy_by_progress()
       e = create_enemy_peeper(x, y)
    elseif r == 4 then
       e = create_enemy_longship(x, y)
+   elseif r == 5 then
+      e = create_enemy_stone(x, y)
    end
    e.y = e.h * -8 -- start just outside the level
 end
