@@ -2,6 +2,30 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 
+timers = {}
+
+function timer_start(id, time)
+   timers[id] = { t = time }
+end
+
+function timer_check(id)
+   return timers[id].t <= 0
+end
+
+function timers_tick()
+   for timer in all(timers) do
+      if timer.t > 0 then
+         timer.t -= 0.01666666
+      else
+         timer.t = 0
+      end
+   end
+end
+
+function timers_clear()
+   timers = {}
+end
+
 function enemy_base(x, y)
    local enemy = {}
    add(enemies, enemy)
@@ -357,6 +381,8 @@ function _init ()
 
    enemies = {}
    progress = 0
+
+   timers_clear()
 end
 
 function player_control()
@@ -431,14 +457,14 @@ function update_game()
 end
 
 function _update60 ()
-	frames += 1
+   timers_tick()
+   frames += 1
   if scene == "title" then
     if btnp(4) or btnp(5) then scene = "game" end
     update_stars()
   else
     update_game()
   end
-
 end
 
 function inside(point, enemy)
