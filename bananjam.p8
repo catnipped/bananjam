@@ -586,12 +586,15 @@ function draw_title()
   map(2,0,0,16,1,12)
   local sine = sin((frames/1000)*3.14)*7
   local sine2 = sin((frames/700)*3.14)*4
-  if (every(60,0,30)) print("press",40,22,0)
-  if (every(60,30,30)) print("start",56+20,97,7)
-  if every(60*20,60*10,60*10) then
+
+  if every(60*30,60*10,60*10) then
     local score = get_score()
     draw_highscore(score, "high-score")
+  elseif every(60*30,60*20,60*10) then
+      draw_instructions()
   else
+    if (every(60,0,30)) print("PRESS",40,22,0)
+    if (every(60,30,30)) print("BUTTON",56+20,97,7)
     if every(480,0,200+rnd(80)) then
       pal(7,7) pal(0,0)
       spr(128,38+sine2,28+sine,6,8)
@@ -603,6 +606,45 @@ function draw_title()
   end
 
 
+end
+
+function draw_instructions()
+  local x = 15
+  local y = 10
+  local x2 = 110
+  pal(7,7)
+  pal(0,0)
+  print("monoid",x,y,7)
+  print("BY @OSSIANBOREN",x,y+6,6)
+  print("AND @E_SVEDANG",x,y+12)
+
+
+  print("PRESS \151 TO",x,y+25,7)
+  print("SWITCH POLARITY",x,y+31)
+  spr(5,x+65,y+25)
+  spr(6,x+85,y+25)
+
+  print("GOOD:    BAD:",x,y+43,6)
+  circfill(x+25,y+45,2,7)
+  circfill(x+25,y+45,1,0)
+  circfill(x+55,y+45,1,7)
+
+  print("GOOD:    BAD:",x+41,y+58,5)
+  circfill(x+64,y+60,2,0)
+  circfill(x+64,y+60,1,7)
+  circfill(x+95,y+60,1,0)
+
+  print("ENERGY IS USED",x+41,y+75,0)
+  print("FOR LIFE AND LASER",x+25,y+81)
+
+  print("good luck!",x+57,y+105,5)
+  if every(4,0,2) then
+    rectfill(x+5,y+65,x+8,y+101,7)
+    rectfill(x+4,y+64,x+7,y+100,0)
+  else
+    rectfill(x+5,y+65,x+8,y+101,0)
+    rectfill(x+4,y+64,x+7,y+100,7)
+  end
 end
 
 function get_score()
@@ -639,6 +681,10 @@ function draw_ui()
   if polarity == true then
     pal(0,7)
     pal(7,0)
+  end
+  if polarity == true and btn(4) and every(4,0,2) then
+    pal(0,0)
+    pal(7,7)
   end
   print(energy,1,121,0)
   print(energy,1,120,7)
