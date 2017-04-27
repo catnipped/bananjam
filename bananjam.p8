@@ -203,10 +203,32 @@ end
 
 function spawn_enemy_wave_by_progress()
    local r = flr(rnd(progress))
-   progress += 1
-   
-   if r > 10 then
-      
+
+   if r < 35 then progress += 1 end
+
+   if r > 30 then
+      local i = 0
+      for x in all(get_x_coord_pattern()) do
+         if i == 1 then
+            create_enemy_destroyer(x - 4, -16)
+         else
+            local s = create_enemy_simple(x, -16)
+            s.movement = 2
+         end
+         i += 1
+      end
+   elseif r > 25 then
+      create_enemy_longship(64 - 4, -64)
+   elseif r > 20 then
+      create_enemy_destroyer(get_x_coord_column(), -16)
+   elseif r > 15 then
+      for i = 1, flr(rnd(3) + 1) do
+         create_enemy_stone(get_x_coord_column(), -32 * i)
+      end
+   elseif r > 10 then
+      local xx = get_x_coord_column()
+      create_enemy_peeper(xx, -16)
+      create_enemy_peeper(128 - xx - 8, -16)
    elseif r > 5 then
       create_enemy_grunt(get_x_coord_column(), -16)
    else
