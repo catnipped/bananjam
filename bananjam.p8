@@ -538,15 +538,11 @@ function draw_ui()
   palt(14,true)
 
   if btnp (5) then --glitch effect from mr.beam
-    for x = 0,128 do
-      for y = 0,128 do
-        if flr(rnd(2)) == 0 then
-          pset(x,y,0)
-        else
-          pset(x,y,7)
+      for x = 0,15 do
+        for y = 0,15 do
+          spr(33+rnd(4),x*8,y*8)
         end
       end
-    end
   end
 
   -- if pok then
@@ -647,9 +643,11 @@ function draw_game()
   --projectiles
   for i = #player.projectiles, 1, -1 do
     n = player.projectiles[i]
-    if polarity == true then line(n.x,n.y,n.x,n.y+3,0)
-    else line(n.x,n.y,n.x,n.y+3,7) end
+    if polarity == true and every(2) then line(n.x,n.y,n.x,n.y+3,0)
+    elseif every(2,1) then line(n.x,n.y,n.x,n.y+3,7) end
   end
+  if btn(4) and polarity and every(2) then circfill(player.x+3,player.y-3,2,0)
+  elseif btn(4) and every(2,1) then circfill(player.x+3,player.y-3,2,7) end
   draw_e_projectiles()
 
 
