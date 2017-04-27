@@ -383,6 +383,8 @@ function _init ()
    progress = 0
 
    timers_clear()
+
+   timer_start(1, 5.0)
 end
 
 function player_control()
@@ -458,6 +460,11 @@ function update_game()
     _init()
   end
   player.energy = mid(0,player.energy,100)
+
+  if timer_check(1) then
+     player.x = 32
+     timer_start(1, 3.0)
+  end
 end
 
 function _update60 ()
