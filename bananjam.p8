@@ -360,9 +360,8 @@ end
 
 function _init ()
   --  scene = "title"
-  scene = "high-score"
+  scene = "title"
   frames = 0
-  dset(1,4235)
 
   init_stars()
 
@@ -375,6 +374,7 @@ function _init ()
   player.hit = 0
   player.projectiles = {}
   player.score = 0
+  player.highscore = false
 
   polarity = false
 
@@ -386,7 +386,8 @@ function _init ()
   progress = 0
 
    timers_clear()
-   timer_start(1, 5.0)
+   timer_start(1, 3.0)
+   timer_start(2, 10.0) --time to show high score
 end
 
 function player_control()
@@ -413,7 +414,7 @@ end
 
 function update_game()
   update_stars()
-
+  if (btnp(4,1)) dset(1,0) dset(2,0)
   -- player update
   player_control()
 
@@ -458,26 +459,57 @@ function update_game()
 
   update_e_projectiles()
   collisions()
+
+  local highscore = get_score()
+  highscore = 0 + highscore
+  if player.score > highscore then player.highscore = true end
+
   if player.energy < 0 then
-    dset(1,player.score)
-    _init()
+    scene = "dead"
+    if player.highscore == true then
+      local score1 = 0 + sub(player.score,1,4)
+      dset(1,player.score)
+      if player.score > 9999 then
+        local score2 = sub(player.score,5,8)
+        dset(2,score2)
+      else
+        dset(2,nil)
+      end
+    end
+    frames = 0
+    timer_start(3,3.0)
   end
   player.energy = mid(0,player.energy,100)
 
-  if timer_check(1) then
-     player.x = 32
-     timer_start(1, 3.0)
-  end
+
 end
 
 function _update60 ()
    timers_tick()
    frames += 1
-  if scene == "title" or scene == "high-score" then
-    if btnp(4) or btnp(5) then scene = "game" end
+  if scene == "title" then
+    if timer_check(1) then
+      if btnp(4) or btnp(5) then
+        timer_start(4,1.0)
+        scene = "lingo"
+      end
+    end
     update_stars()
-  else
+  elseif scene == "dead" then
+    update_death()
+  elseif scene == "game" then
     update_game()
+  end
+  if scene == "lingo" then
+    if timer_check(4) then scene = "game" end
+  end
+
+end
+
+function update_death()
+  if timer_check(3) and btn(4) then
+     scene = "title"
+     _init()
   end
 end
 
@@ -517,33 +549,24 @@ function collisions()
   end
 end
 
-function draw_highscore()
+function draw_highscore(score,string)
   pal()
-  rectfill(0,0,128,128,5)
-  draw_stars()
-  rectfill(0,0,4,127,9)
-  rectfill(127-4,0,127,127,9)
   palt(0,false)
   palt(14,true)
-  map(2,0,127-8,16,1,12)
-  pal(7,0) pal(0,7)
-  map(2,0,0,16,1,12)
-
-  local score = dget(1)
   local length = "0" .. score
   length = #length -2
+  local x = 26
+  local y = 48
+  rectfill(x-3,y-3,x + (8*5), y + 23, 7)
+  rectfill(x+(8*5),y-3,x + (8*10) + 1, y + 23, 0)
+  rectfill(x-2,y-2,x + (8*10), y + 22, 5)
+  pal(0,7)
+  pal(7,0)
   for n = 0,length do
-    local sine = sin(((frames/1000)*3.14)+(n*10))*7
     local nr = sub(score, n+1,n+1) or 0
     nr = "0" .. nr
-    if polarity == false then
-      pal(0,7)
-      pal(7,0)
-    elseif polarity == true then
-      pal(0,0)
-      pal(7,7)
-    end
-    spr(134+nr,(n*10)+40,60+sine,1,2)
+    print(string,x,y-1,7)
+    spr(134+nr,(n*10)+x,y+5,1,2)
   end
 end
 
@@ -563,21 +586,36 @@ function draw_title()
   map(2,0,0,16,1,12)
   local sine = sin((frames/1000)*3.14)*7
   local sine2 = sin((frames/700)*3.14)*4
-  if every(480,0,200+rnd(80)) then
-    pal(7,7) pal(0,0)
-    spr(128,38+sine2,32+sine,6,8)
-    polarity = false
-  elseif every(480,240,200+rnd(80)) then
-    spr(128,38+sine2,32+sine,6,8)
-    polarity = true
+  if timer_check(2) then
+    local score = get_score()
+    draw_highscore(score, "high-score")
+  else
+    if every(480,0,200+rnd(80)) then
+      pal(7,7) pal(0,0)
+      spr(128,38+sine2,32+sine,6,8)
+      polarity = false
+    elseif every(480,240,200+rnd(80)) then
+      spr(128,38+sine2,32+sine,6,8)
+      polarity = true
+    end
   end
+end
+
+function get_score()
+  local score = 0
+  if dget(1) > 0  and dget(2) > 0 then
+    score = dget(1) .. dget(2)
+  elseif dget(1) > 0 then
+    score = dget(1)
+  end
+  return score
 end
 
 function draw_ui()
   palt(0,false)
   palt(14,true)
 
-  if btnp (5) then --glitch effect from mr.beam
+  if btnp (5) then
       for x = 0,15 do
         for y = 0,15 do
           spr(33+rnd(4),x*8,y*8)
@@ -585,28 +623,17 @@ function draw_ui()
       end
   end
 
-  -- if pok then
-  --   pok*=0.9
-  --
-  --   gf=function() return 0x6000+flr(rnd(6000)) end
-  --
-  --   f=gf()
-  --   memcpy(f,f+8*pok,100)
-  --   f=flr(rnd(600))
-  --   if(flr(rnd(8))==0) memcpy(0x6000+f,0x6000+f+flr(rnd(3))*pok,100)
-  --
-  --   cs=cos((frames%60)/60)
-  --   cs*=pok
-  --   for i=0,100 do
-  --     b=0x6000+i*80
-  --     c=i/100
-  --     le=70
-  --     memcpy(b,b+i%(1+cs),le)
-  --   end
-  -- end
-
 	rectfill(0,0,4,128,9)
 	rectfill(127-4,0,128,128,9)
+  local energy = flr(player.energy)
+  print(energy,1,121,0)
+  print(energy,1,120,7)
+  if player.highscore then
+    print("NEW SCORE", 85,120,9)
+  else
+    local score = get_score()
+    print(score, 85,120,9)
+  end
   if btn(4) and every(4,0,2) then
     pal(0,7)
     pal(7,0)
@@ -652,7 +679,7 @@ function draw_ui()
     spr(134+nr,119,n*16,1,2)
   end
 
-  print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) ),10,1,14)
+
 end
 
 function draw_game()
@@ -737,14 +764,41 @@ function draw_game()
   draw_ui()
 end
 
+function draw_death()
+  if timer_check(3) then
+    for x = 0,15 do
+      for y = 0,15 do
+        if every(rnd(6)) then spr(33+rnd(4),x*8,y*8,1,1,rnd(2),rnd(2)) end
+      end
+    end
+    local message = "YOUR SCORE"
+    if (player.highscore) message = "NEW HIGH-SCORE"
+    draw_highscore(player.score,message)
+    rectfill(0,0,4,128,9)
+  	rectfill(127-4,0,128,128,9)
+  else
+    if every(2) then circfill(player.x+3,player.y+2,frames/4,7)
+    else circfill(player.x+4,player.y+3,frames/4,0) end
+  end
+end
+
 function _draw ()
   if scene == "title" then
     draw_title()
-  elseif scene == "high-score" then
-    draw_highscore()
-  else
+  elseif scene == "dead" then
+    draw_death()
+  elseif scene == "game" then
     draw_game()
+  else
+    for x = 0,15 do
+      for y = 0,15 do
+        if every(rnd(6)) then spr(33+rnd(4),x*8,y*8,1,1,rnd(2),rnd(2)) end
+      end
+    end
+    rectfill(0,0,4,128,9)
+    rectfill(127-4,0,128,128,9)
   end
+  print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) .. " scene:" .. scene ),10,1,14)
 end
 __gfx__
 00000000eee7ee7eee7eeeeeeeeeeeeeeeeeeeeeee000eeeee777eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
