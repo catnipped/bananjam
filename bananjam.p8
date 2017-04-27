@@ -159,6 +159,7 @@ function update_enemy(e)
    elseif e.shotpattern == 4 then
       -- Bursts of a lot of shots going almost straight forward
       if every(100) then
+         e.polarity = not e.polarity
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.0)
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.5)
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.0)
