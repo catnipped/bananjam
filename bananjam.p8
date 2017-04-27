@@ -187,22 +187,32 @@ enemies = {}
 e_projectiles = {}
 progress = 0
 
-function spawn_enemy_by_progress()
-   local r = flr(rnd(6))
-   local x = 20 + rnd(128 - 40)
-   local y = -16
-   if r == 0 then
-      create_enemy_simple(x, y)
-   elseif r == 1 then
-      create_enemy_grunt(x, y)
-   elseif r == 2 then
-      create_enemy_destroyer(x, y)
-   elseif r == 3 then
-      create_enemy_peeper(x, y)
-   elseif r == 4 then
-      create_enemy_longship(x, y)
-   elseif r == 5 then
-      create_enemy_stone(x, y)
+x_patterns = {
+   { 32, 48, 64 },
+   { 48, 64, 80 },
+   { 32, 64, 96 },
+}
+
+function get_x_coord_pattern()
+   return x_patterns[flr(rnd(#x_patterns)) + 1]
+end
+
+function get_x_coord_column()
+   return (flr(rnd(12)) + 2) * 8
+end
+
+function spawn_enemy_wave_by_progress()
+   local r = flr(rnd(progress))
+   progress += 1
+   
+   if r > 10 then
+      
+   elseif r > 5 then
+      create_enemy_grunt(get_x_coord_column(), -16)
+   else
+      for x in all(get_x_coord_pattern()) do
+         create_enemy_simple(x, -8)
+      end
    end
 end
 
@@ -362,8 +372,8 @@ function update_game()
 
     --enemies
 
-    if frames % 120 == 0 then
-       spawn_enemy_by_progress()
+    if frames % 180 == 0 then
+       spawn_enemy_wave_by_progress()
     end
 
     for e in all(enemies) do
