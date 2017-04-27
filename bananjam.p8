@@ -381,7 +381,7 @@ function _init ()
   shield = {}
   shield.x = 60
   shield.y = 58
-
+  oldscore = get_score()
   enemies = {}
   progress = 0
 
@@ -781,7 +781,7 @@ function draw_death()
     if player.highscore then
       message = "NEW HIGH-SCORE"
       rectfill(25,89,8*10+25,95,0)
-      print("OLD SCORE:" .. get_score(), 26, 90, 7)
+      print("OLD SCORE:" .. oldscore, 26, 90, 7)
     end
     draw_highscore(player.score,message)
 
