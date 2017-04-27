@@ -334,29 +334,29 @@ end
 
 
 function _init ()
-  scene = "title"
-  frames = 0
+   scene = "title"
+   frames = 0
 
-	init_stars()
+   init_stars()
 
-	player = {}
-  player.energy = 60
-	player.x = 64
-	player.y = 64
-  player.w = 1
-  player.h = 1
-  player.hit = 0
-	player.projectiles = {}
-  player.score = 0
+   player = {}
+   player.energy = 60
+   player.x = 64
+   player.y = 64
+   player.w = 1
+   player.h = 1
+   player.hit = 0
+   player.projectiles = {}
+   player.score = 0
 
-  polarity = false
+   polarity = false
 
-  shield = {}
-	shield.x = 60
-	shield.y = 58
+   shield = {}
+   shield.x = 60
+   shield.y = 58
 
-    --add(enemies, create_enemy_grunt(64, 10))
-    --add(enemies, create_enemy_destroyer(64, 10))
+   enemies = {}
+   progress = 0
 end
 
 function player_control()
