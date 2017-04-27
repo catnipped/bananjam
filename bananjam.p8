@@ -391,7 +391,7 @@ function _init ()
 end
 
 function player_control()
-  if btn(4) and player.energy > 0 then
+  if btn(4) and player.energy > 1 then
     add(player.projectiles,{x = player.x+3, y = player.y+4})
     add(player.projectiles,{x = player.x+3, y = player.y+2})
     add(player.projectiles,{x = player.x+3, y = player.y})
@@ -556,7 +556,7 @@ function draw_highscore(score,string)
   local length = "0" .. score
   length = #length -2
   local x = 26
-  local y = 48
+  local y = 53
   rectfill(x-3,y-3,x + (8*5), y + 23, 7)
   rectfill(x+(8*5),y-3,x + (8*10) + 1, y + 23, 0)
   rectfill(x-2,y-2,x + (8*10), y + 22, 5)
@@ -586,9 +586,11 @@ function draw_title()
   map(2,0,0,16,1,12)
   local sine = sin((frames/1000)*3.14)*7
   local sine2 = sin((frames/700)*3.14)*4
-  if timer_check(2) then
+  if (every(60,0,30)) print("PRESS",40,22,0)
+  if (every(60,30,30)) print("START",56+20,97,7)
+  if every(60*20,60*10,60*10) then
     local score = get_score()
-    draw_highscore(score, "high-score")
+    draw_highscore(score, "HIGH-SCORE")
   else
     if every(480,0,200+rnd(80)) then
       pal(7,7) pal(0,0)
@@ -599,6 +601,8 @@ function draw_title()
       polarity = true
     end
   end
+
+
 end
 
 function get_score()
@@ -625,28 +629,30 @@ function draw_ui()
 
 	rectfill(0,0,4,128,9)
 	rectfill(127-4,0,128,128,9)
-  local energy = flr(player.energy)
-  print(energy,1,121,0)
-  print(energy,1,120,7)
-  if player.highscore then
-    print("NEW SCORE", 85,120,9)
-  else
-    local score = get_score()
-    print(score, 85,120,9)
-  end
+
+
   if btn(4) and every(4,0,2) then
     pal(0,7)
     pal(7,0)
   end
-
+  local energy = flr(player.energy)
   if polarity == true then
-    rectfill(2,121-player.energy,6,121,7)
-    rectfill(1,120-player.energy,5,120,0)
-  else
-    rectfill(2,121-player.energy,6,121,0)
-    rectfill(1,120-player.energy,5,120,7)
+    pal(0,7)
+    pal(7,0)
   end
-
+  print(energy,1,121,0)
+  print(energy,1,120,7)
+  local energybar = 117
+  rectfill(2,energybar+1-player.energy,6,energybar+1,0)
+  rectfill(1,energybar-player.energy,5,energybar,7)
+  if energy < 20 and every(60,0,30) then
+    print("ENERGY LOW",9,121,0)
+    print("ENERGY LOW",9,120,9)
+  end
+  if player.highscore then
+    print("NEW SCORE", 87,121,0)
+    print("NEW SCORE", 87,120,9)
+  end
 
   -- function polaritylabel()
   --   if polarity == false then
@@ -772,8 +778,13 @@ function draw_death()
       end
     end
     local message = "YOUR SCORE"
-    if (player.highscore) message = "NEW HIGH-SCORE"
+    if player.highscore then
+      message = "NEW HIGH-SCORE"
+      rectfill(25,89,8*10+25,95,0)
+      print("OLD SCORE:" .. get_score(), 26, 90, 7)
+    end
     draw_highscore(player.score,message)
+
     rectfill(0,0,4,128,9)
   	rectfill(127-4,0,128,128,9)
   else
@@ -798,7 +809,7 @@ function _draw ()
     rectfill(0,0,4,128,9)
     rectfill(127-4,0,128,128,9)
   end
-  print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) .. " scene:" .. scene ),10,1,14)
+  --print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) .. " scene:" .. scene ),10,1,14)
 end
 __gfx__
 00000000eee7ee7eee7eeeeeeeeeeeeeeeeeeeeeee000eeeee777eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
