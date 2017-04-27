@@ -375,7 +375,7 @@ function _init ()
   player.projectiles = {}
   player.score = 0
   player.highscore = false
-
+  e_projectiles = {}
   polarity = false
 
   shield = {}
