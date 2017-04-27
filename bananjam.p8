@@ -357,33 +357,35 @@ function draw_stars()
 end
 
 
+
 function _init ()
-   scene = "title"
-   frames = 0
+  --  scene = "title"
+  scene = "high-score"
+  frames = 0
+  dset(1,4235)
 
-   init_stars()
+  init_stars()
 
-   player = {}
-   player.energy = 60
-   player.x = 64
-   player.y = 64
-   player.w = 1
-   player.h = 1
-   player.hit = 0
-   player.projectiles = {}
-   player.score = 0
+  player = {}
+  player.energy = 60
+  player.x = 64
+  player.y = 64
+  player.w = 1
+  player.h = 1
+  player.hit = 0
+  player.projectiles = {}
+  player.score = 0
 
-   polarity = false
+  polarity = false
 
-   shield = {}
-   shield.x = 60
-   shield.y = 58
+  shield = {}
+  shield.x = 60
+  shield.y = 58
 
-   enemies = {}
-   progress = 0
+  enemies = {}
+  progress = 0
 
    timers_clear()
-
    timer_start(1, 5.0)
 end
 
@@ -457,6 +459,7 @@ function update_game()
   update_e_projectiles()
   collisions()
   if player.energy < 0 then
+    dset(1,player.score)
     _init()
   end
   player.energy = mid(0,player.energy,100)
@@ -470,7 +473,7 @@ end
 function _update60 ()
    timers_tick()
    frames += 1
-  if scene == "title" then
+  if scene == "title" or scene == "high-score" then
     if btnp(4) or btnp(5) then scene = "game" end
     update_stars()
   else
@@ -514,6 +517,36 @@ function collisions()
   end
 end
 
+function draw_highscore()
+  pal()
+  rectfill(0,0,128,128,5)
+  draw_stars()
+  rectfill(0,0,4,127,9)
+  rectfill(127-4,0,127,127,9)
+  palt(0,false)
+  palt(14,true)
+  map(2,0,127-8,16,1,12)
+  pal(7,0) pal(0,7)
+  map(2,0,0,16,1,12)
+
+  local score = dget(1)
+  local length = "0" .. score
+  length = #length -2
+  for n = 0,length do
+    local sine = sin(((frames/1000)*3.14)+(n*10))*7
+    local nr = sub(score, n+1,n+1) or 0
+    nr = "0" .. nr
+    if polarity == false then
+      pal(0,7)
+      pal(7,0)
+    elseif polarity == true then
+      pal(0,0)
+      pal(7,7)
+    end
+    spr(134+nr,(n*10)+40,60+sine,1,2)
+  end
+end
+
 function draw_title()
   pal()
   rectfill(0,0,64,128,0)
@@ -522,7 +555,7 @@ function draw_title()
   circfill(64,95,31,7)
   draw_stars()
   rectfill(0,0,4,127,9)
-  rectfill(127-5,0,127,127,9)
+  rectfill(127-4,0,127,127,9)
   palt(0,false)
   palt(14,true)
   map(2,0,127-8,16,1,12)
@@ -707,6 +740,8 @@ end
 function _draw ()
   if scene == "title" then
     draw_title()
+  elseif scene == "high-score" then
+    draw_highscore()
   else
     draw_game()
   end
