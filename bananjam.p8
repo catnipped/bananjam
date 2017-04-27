@@ -387,7 +387,11 @@ end
 
 function player_control()
   if btn(4) and player.energy > 0 then
+    add(player.projectiles,{x = player.x+3, y = player.y+4})
+    add(player.projectiles,{x = player.x+3, y = player.y+2})
     add(player.projectiles,{x = player.x+3, y = player.y})
+    add(player.projectiles,{x = player.x+3, y = player.y-2})
+    add(player.projectiles,{x = player.x+3, y = player.y-4})
     player.energy -= 0.1
   end
   if btnp(5) then
@@ -413,7 +417,7 @@ function update_game()
   -- shield.x = lerp(shield.x,player.x-4,0.1)
 	-- shield.y = lerp(shield.y,player.y-8,0.5)
 	for n = #player.projectiles, 1, -1 do
-		player.projectiles[n].y -= 5
+		player.projectiles[n].y -= 8
     player.projectiles[n].x = player.x+3
 		if player.projectiles[n].y < -30 then del(player.projectiles,player.projectiles[1]) end
 	end
@@ -468,6 +472,7 @@ function _update60 ()
 end
 
 function inside(point, enemy)
+  if point == nil then return false end
    local px = point.x
    local py = point.y
    return
@@ -483,6 +488,7 @@ function collisions()
             e.hp -= 1
             e.hit = true
             if (every(4)) player.score += 1
+            del(player.projectiles,player.projectiles[p])
          end
       end
    end
@@ -641,8 +647,8 @@ function draw_game()
   --projectiles
   for i = #player.projectiles, 1, -1 do
     n = player.projectiles[i]
-    if polarity == true then line(n.x,n.y,n.x,n.y+5,0)
-    else line(n.x,n.y,n.x,n.y+5,7) end
+    if polarity == true then line(n.x,n.y,n.x,n.y+3,0)
+    else line(n.x,n.y,n.x,n.y+3,7) end
   end
   draw_e_projectiles()
 
@@ -651,7 +657,11 @@ function draw_game()
 
   --enemies
   for e in all(enemies) do
-
+    if e.hit then
+        local x = player.x+4
+        local y = e.y + (e.h*8)
+        circfill(x,y,rnd(4),5+rnd(2))
+    end
     if e.polarity == true then
       pal(0,7)
       pal(7,0)
@@ -667,7 +677,6 @@ function draw_game()
       pal(7,7)
       e.hit = false
     end
-
     spr(e.sprite,e.x,e.y,e.w,e.h)
 
   end
