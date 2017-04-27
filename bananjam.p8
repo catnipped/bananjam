@@ -381,7 +381,7 @@ function _init ()
   shield = {}
   shield.x = 60
   shield.y = 58
-
+  oldscore = get_score()
   enemies = {}
   progress = 0
 
@@ -594,10 +594,10 @@ function draw_title()
   else
     if every(480,0,200+rnd(80)) then
       pal(7,7) pal(0,0)
-      spr(128,38+sine2,32+sine,6,8)
+      spr(128,38+sine2,28+sine,6,8)
       polarity = false
     elseif every(480,240,200+rnd(80)) then
-      spr(128,38+sine2,32+sine,6,8)
+      spr(128,38+sine2,28+sine,6,8)
       polarity = true
     end
   end
@@ -716,10 +716,10 @@ function draw_game()
   --projectiles
   for i = #player.projectiles, 1, -1 do
     n = player.projectiles[i]
-    if polarity == true and every(2) then line(n.x,n.y,n.x,n.y+3,0)
+    if polarity == true and every(2,1) then line(n.x,n.y,n.x,n.y+3,0)
     elseif every(2,1) then line(n.x,n.y,n.x,n.y+3,7) end
   end
-  if btn(4) and polarity and every(2) then circfill(player.x+3,player.y-3,2,0)
+  if btn(4) and polarity and every(2,1) then circfill(player.x+3,player.y-3,2,0)
   elseif btn(4) and every(2,1) then circfill(player.x+3,player.y-3,2,7) end
   draw_e_projectiles()
 
@@ -781,7 +781,7 @@ function draw_death()
     if player.highscore then
       message = "new high-score"
       rectfill(25,89,8*10+25,95,0)
-      print("old score:" .. get_score(), 26, 90, 7)
+      print("old score:" .. oldscore, 26, 90, 7)
     end
     draw_highscore(player.score,message)
 
@@ -1106,4 +1106,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
