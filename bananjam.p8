@@ -60,7 +60,7 @@ end
 
 function create_enemy_destroyer(x, y)
    local enemy = enemy_base(x, y)
-   enemy.hp = 180
+   enemy.hp = 250
    enemy.sprite = 96
    enemy.movement = 2
    enemy.w = 2
@@ -110,6 +110,18 @@ function create_enemy_stone(x, y)
    return enemy
 end
 
+function create_enemy_banana(x, y)
+   local enemy = enemy_base(x, y)
+   enemy.hp = 1000
+   enemy.sprite = 71
+   enemy.movement = 4
+   enemy.shotpattern = 6
+   enemy.w = 4
+   enemy.h = 4
+   enemy.gunoffset.y -= 10
+   return enemy
+end
+
 function update_enemy(e)
    if e.movement == 0 then
       -- move back and forth across the whole screen
@@ -117,11 +129,11 @@ function update_enemy(e)
       elseif e.polarity == true then e.x -= e.speed end
       if e.x > 100 then e.polarity = true
       elseif e.x < 15 then e.polarity = false end
-      e.y += 0.2
+      e.y += 0.25
    elseif e.movement == 1 then
       -- move like a snake
       e.x += sin(e.y / 50) * 0.5
-      e.y += 0.25
+      e.y += 0.4
    elseif e.movement == 2 then
       -- move down, then out to the side
       if e.y < 50 then
@@ -147,6 +159,11 @@ function update_enemy(e)
          if e.y < 0 then
             e.state = 0
          end
+      end
+   elseif e.movement == 4 then
+      -- boss movement
+      if e.y < 50 then
+         e.y += 0.05
       end
    end
 
@@ -200,6 +217,15 @@ function update_enemy(e)
             e.polarity = not e.polarity
          end
       end
+   elseif e.shotpattern == 6 then
+      if every(50) then
+         add_e_projectile(gun_x, gun_y, e.polarity, 0.05 + rnd(0.01) - 0.005, 2.0)
+         add_e_projectile(gun_x, gun_y, not e.polarity, 0.025 + rnd(0.01) - 0.005, 2.5)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.0)
+         add_e_projectile(gun_x, gun_y, not e.polarity, -0.025 + rnd(0.01) - 0.005, 3.5)
+         add_e_projectile(gun_x, gun_y, e.polarity, -0.05 + rnd(0.01) - 0.005, 4.0)
+         e.polarity = not e.polarity
+      end
    end
 
    --collision with player
@@ -231,7 +257,16 @@ end
 function spawn_enemy_wave_by_progress()
    local r = flr(rnd(progress))
 
-   if r < 35 then progress += 1 end
+   create_enemy_banana(64 - 8, -64)
+   
+      
+   if r < 35 then
+      progress += 1
+   else
+      create_enemy_banana(64 - 8, -64)
+      progress = 30
+      return
+   end
 
    if r > 30 then
       local i = 0
@@ -388,7 +423,7 @@ function _init ()
   shield.y = 58
   oldscore = get_score()
   enemies = {}
-  progress = 0
+  progress = 33
 
    timers_clear()
    timer_start(1, 1.0)
