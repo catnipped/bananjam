@@ -129,11 +129,11 @@ function update_enemy(e)
       elseif e.polarity == true then e.x -= e.speed end
       if e.x > 100 then e.polarity = true
       elseif e.x < 15 then e.polarity = false end
-      e.y += 0.25
+      e.y += 0.35
    elseif e.movement == 1 then
       -- move like a snake
       e.x += sin(e.y / 50) * 0.5
-      e.y += 0.4
+      e.y += 0.5
    elseif e.movement == 2 then
       -- move down, then out to the side
       if e.y < 50 then
@@ -212,17 +212,21 @@ function update_enemy(e)
    elseif e.shotpattern == 5 then
       -- shot all directions
       if every(180) then
-         for angle = 0.0, 1.0, 0.2 do
+         for angle = 0.0, 1.0, 0.1 do
             add_e_projectile(gun_x, gun_y, e.polarity, angle, rnd(1.5) + 0.25)
-            e.polarity = not e.polarity
          end
+         e.polarity = not e.polarity
       end
    elseif e.shotpattern == 6 then
       if every(50) then
          add_e_projectile(gun_x, gun_y, e.polarity, 0.05 + rnd(0.01) - 0.005, 1.0)
          add_e_projectile(gun_x, gun_y, not e.polarity, 0.025 + rnd(0.01) - 0.005, 1.5)
+         add_e_projectile(gun_x, gun_y, not e.polarity, 0.025 + rnd(0.01) - 0.005, 0.5)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 3.0)
          add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 2.0)
+         add_e_projectile(gun_x, gun_y, e.polarity, rnd(0.01) - 0.005, 1.0)
          add_e_projectile(gun_x, gun_y, not e.polarity, -0.025 + rnd(0.01) - 0.005, 1.5)
+         add_e_projectile(gun_x, gun_y, not e.polarity, -0.025 + rnd(0.01) - 0.005, 0.5)
          add_e_projectile(gun_x, gun_y, e.polarity, -0.05 + rnd(0.01) - 0.005, 1.0)
          e.polarity = not e.polarity
       end
@@ -261,8 +265,10 @@ function spawn_enemy_wave_by_progress()
    if progress % 30 == 0 then
       create_enemy_banana(get_x_coord_column(), -32)
    end
-   
-   local r = flr(rnd(progress))
+
+   local randLimit = progress
+   if randLimit > 35 then randLimit = 35 end
+   local r = flr(rnd(randLimit))
 
    if r > 30 then
       local i = 0
@@ -473,7 +479,7 @@ function update_game()
     --enemies
 
     local rate = 120 - (progress * 0.5)
-    if rate < 30 then rate = 30 end
+    if rate < 60 then rate = 60 end
     
     if frames % rate == 0 then
        spawn_enemy_wave_by_progress()
