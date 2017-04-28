@@ -559,7 +559,7 @@ function update_game()
        if player.energy <= 20 then
           lowEnergyMulti = 2
        end
-       player.score += lowEnergyMulti * (enemies[e].score * (100 - player.energy))
+       player.score += lowEnergyMulti * (enemies[e].score * 10 * player.combo)
        add(explosions,{ex = x+4*enemies[e].w, ey = y+4*enemies[e].h, size = 4*enemies[e].h})
        del(enemies,enemies[e])
     end
