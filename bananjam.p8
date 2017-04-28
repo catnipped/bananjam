@@ -481,6 +481,7 @@ function _init ()
    oldscore = get_score()
    enemies = {}
    progress = 0
+   explosions = {}
 
    timers_clear()
    timer_start(1, 1.0)
@@ -557,6 +558,7 @@ function update_game()
           lowEnergyMulti = 2
        end
        player.score += lowEnergyMulti * (enemies[e].score * (100 - player.energy))
+       add(explosions,{ex = x+4*enemies[e].w, ey = y+4*enemies[e].h, size = 4*enemies[e].h})
        del(enemies,enemies[e])
     end
 
@@ -643,7 +645,7 @@ function collisions()
    end
    for p = #player.projectiles, 1, -1 do
       for e in all(enemies) do
-         if inside(player.projectiles[p], e) then            
+         if inside(player.projectiles[p], e) then
             e.hp -= playerLaserDMG
             e.hit = true
             if (every(4)) player.score += 1  sfx(12,3)
@@ -921,6 +923,18 @@ function draw_game()
     spr(e.sprite,e.x,e.y,e.w,e.h)
 
   end
+  if explosions[1] ~= nil then
+    for e = #explosions, 1, -1 do
+      local e = explosions[e]
+      local color = 0
+      if polarity then color = 7 end
+      circfill(e.ex,e.ey,e.size,color)
+      e.size -= rnd(1)
+      if e.size < 0 then del(explosions,explosions[e]) end
+    end
+  end
+
+
   pal()
   palt(0,false)
   palt(14,true)
