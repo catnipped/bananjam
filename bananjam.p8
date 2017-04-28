@@ -633,11 +633,15 @@ function inside(point, enemy)
 end
 
 function collisions()
-  --laser collison
+   --laser collison
+   local playerLaserDMG = 1
+   if player.energy <= 20 then
+      playerLaserDMG = 2
+   end
    for p = #player.projectiles, 1, -1 do
       for e in all(enemies) do
-         if inside(player.projectiles[p], e) then
-            e.hp -= 1
+         if inside(player.projectiles[p], e) then            
+            e.hp -= playerLaserDMG
             e.hit = true
             if (every(4)) player.score += 1  sfx(12,3)
             del(player.projectiles,player.projectiles[p])
