@@ -655,11 +655,11 @@ function collisions()
   for p = #e_projectiles, 1, -1 do
       if inside(e_projectiles[p], player) then
         if e_projectiles[p].polarity ~= polarity then
-          player.energy += 4
+          player.energy += 3
           player.score += player.combo
           player.combo += 1
         elseif e_projectiles[p].polarity == polarity then
-          player.energy -= 10
+          player.energy -= 12
           player.hit += 2
           player.combo = 1
           sfx(13,3)
