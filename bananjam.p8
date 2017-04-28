@@ -78,6 +78,9 @@ function create_enemy_peeper(x, y)
    enemy.state = 0
    enemy.shotpattern = 1
    enemy.flip = true
+   if rnd(100) > 50 then
+      enemy.polarity = true
+   end
    return enemy
 end
 
@@ -161,15 +164,15 @@ function update_enemy(e)
    elseif e.movement == 3 then
       -- move down, then up, repeat
       if e.state == 0 then
-         e.polarity = true
          e.y += 0.25
          if e.y > 64 then
+            e.polarity = not e.polarity
             e.state = 1
          end
       else
-         e.polarity = false
          e.y -= 0.25
          if e.y < 0 then
+            e.polarity = not e.polarity
             e.state = 0
          end
       end
