@@ -509,10 +509,12 @@ function player_control()
     end
     sfx(14)
   end
-  if btn(2) then player.y -= 1 end
-  if btn(1) then player.x += 1 end
-  if btn(3) then player.y += 1 end
-  if btn(0) then player.x -= 1 end
+  local speed = 1
+  if player.energy >= 100 then speed = 2 end
+  if btn(2) then player.y -= speed end
+  if btn(1) then player.x += speed end
+  if btn(3) then player.y += speed end
+  if btn(0) then player.x -= speed end
   player.x =mid (3,player.x,118)
   player.y =mid (0,player.y,120)
 end
@@ -808,11 +810,12 @@ function draw_ui()
     pal(0,0)
     pal(7,7)
   end
+  if energy >= 100 then energy = "MAX" end
   print(energy,1,121,0)
   print(energy,1,120,7)
   local energybar = 117
   local ragemode = 7
-  if energy < 20 and every(4,0,2) then
+  if player.energy < 20 and every(4,0,2) then
     ragemode = 9
   end
   rectfill(2,energybar+1-player.energy,6,energybar+1,0)
@@ -1291,4 +1294,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
