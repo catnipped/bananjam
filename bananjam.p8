@@ -201,7 +201,7 @@ function update_enemy(e)
          end
       end
    end
-   
+
    gun_x = e.x + e.w * 4 + e.gunoffset.x
    gun_y = e.y + e.h * 8 + e.gunoffset.y
 
@@ -535,7 +535,7 @@ function update_game()
 
     local rate = 120 - (progress * 0.5)
     if rate < 60 then rate = 60 end
-    
+
     if frames % rate == 0 then
        spawn_enemy_wave_by_progress()
     end
@@ -604,8 +604,9 @@ function _update60 ()
     end
     update_stars()
   elseif scene == "dead" then
-    update_death()
     music(-1)
+    update_death()
+
 
   elseif scene == "game" then
     update_game()
@@ -808,14 +809,14 @@ function draw_ui()
   print(energy,1,121,0)
   print(energy,1,120,7)
   local energybar = 117
-  rectfill(2,energybar+1-player.energy,6,energybar+1,0)
-  rectfill(1,energybar-player.energy,5,energybar,7)
-  if energy < 20 and every(60,0,30) then
-    print("energy low",9,121-6,0)
-    print("energy low",9,120-6,9)
+  local ragemode = 7
+  if energy < 20 and every(4,0,2) then
+    ragemode = 9
   end
+  rectfill(2,energybar+1-player.energy,6,energybar+1,0)
+  rectfill(1,energybar-player.energy,5,energybar,ragemode)
+
   if player.highscore then
-    print("new score", 87,121,0)
     print("new score", 87,120,9)
   end
 
@@ -879,15 +880,17 @@ function draw_game()
     circfill(player.x+3,player.y+4,player.hit*(1+rnd(4)),7)
     player.hit -= 1
   end
-
+  local ragemode0 = 0
+  local ragemode7 = 7
+  if player.energy < 20 then ragemode0=9 ragemode7=9 end
   --projectiles
   for i = #player.projectiles, 1, -1 do
     n = player.projectiles[i]
-    if polarity == true and every(2,1) then line(n.x,n.y,n.x,n.y+3,0)
-    elseif every(2,1) then line(n.x,n.y,n.x,n.y+3,7) end
+    if every(2,1) and polarity then line(n.x,n.y,n.x,n.y+3,ragemode0)
+    elseif every(2,1) then line(n.x,n.y,n.x,n.y+3,ragemode7) end
   end
-  if btn(4) and polarity and every(2,1) then circfill(player.x+3,player.y-3,2,0)
-  elseif btn(4) and every(2,1) then circfill(player.x+3,player.y-3,2,7) end
+  if btn(4) and polarity and every(2,1) then circfill(player.x+3,player.y-3,2,ragemode0)
+  elseif btn(4) and every(2,1) then circfill(player.x+3,player.y-3,2,ragemode7) end
   draw_e_projectiles()
 
 
@@ -1274,4 +1277,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
