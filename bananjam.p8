@@ -273,7 +273,9 @@ function update_enemy(e)
    end
 
    --collision with player
-   if inside(player, e) then
+   if player.x + 8 > e.x and player.x < e.x + e.w and
+      player.y + 8 > e.y and player.y < e.y + e.h
+   then
      e.hit = true
      player.energy -= 1
      player.combo = 1
@@ -652,7 +654,7 @@ function collisions()
   for p = #e_projectiles, 1, -1 do
       if inside(e_projectiles[p], player) then
         if e_projectiles[p].polarity ~= polarity then
-          player.energy += 3
+          player.energy += 4
           player.score += player.combo
           player.combo += 1
         elseif e_projectiles[p].polarity == polarity then
