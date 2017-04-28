@@ -583,12 +583,12 @@ function update_game()
     if player.highscore == true then
       local score1 = 0 + sub(player.score,1,4)
       dset(1,player.score)
-      if player.score > 9999 then
-        local score2 = sub(player.score,5,8)
-        dset(2,score2)
-      else
-        dset(2,nil)
-      end
+      -- if player.score > 9999 then
+      --   local score2 = sub(player.score,5,8)
+      --   dset(2,score2)
+      -- else
+      --   dset(2,nil)
+      -- end
     end
     frames = 0
     timer_start(3,3.0)
@@ -621,7 +621,7 @@ function _update60 ()
     update_game()
   end
   if scene == "lingo" then
-    if timer_check(4) then scene = "game" music(3,1+2) sfx(-1) end
+    if timer_check(4) then scene = "game" music(3,1+2) sfx(-1) frames = 0 end
   end
 
 end
@@ -778,9 +778,9 @@ end
 
 function get_score()
   local score = 0
-  if dget(1) > 0  and dget(2) > 0 then
-    score = dget(1) .. dget(2)
-  elseif dget(1) > 0 then
+  -- if dget(1) > 0  and dget(2) > 0 then
+  --   score = dget(1) .. dget(2)
+  if dget(1) > 0 then
     score = dget(1)
   end
   return score
