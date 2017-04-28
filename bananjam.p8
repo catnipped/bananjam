@@ -722,8 +722,8 @@ function draw_title()
   elseif every(60*30,60*20,60*10) then
       draw_instructions()
   else
-    if (every(60,0,30)) print("press",40,22,0)
-    if (every(60,30,30)) print("button",56+20,97,7)
+    if (every(60,0,30)) print("PRESS",40,22,0)
+    if (every(60,30,30)) print("BUTTON",56+20,97,7)
     if every(480,0,200+rnd(80)) then
       pal(7,7) pal(0,0)
       spr(128,38+sine2,28+sine,6,8)
@@ -744,29 +744,29 @@ function draw_instructions()
   pal(7,7)
   pal(0,0)
   print("monoid",x,y,7)
-  print("by @ossianboren",x,y+6,6)
-  print("and @e_svedang",x,y+12)
+  print("BY @OSSIANBOREN",x,y+6,6)
+  print("AND @E_SVEDANG",x,y+12)
 
 
-  print("press \151 to",x,y+25,7)
-  print("switch polarity",x,y+31)
+  print("PRESS \151 TO",x,y+25,7)
+  print("SWITCH POLARITY",x,y+31)
   spr(5,x+65,y+25)
   spr(6,x+85,y+25)
 
-  print("good:    bad:",x,y+43,6)
+  print("GOOD:    BAD:",x,y+43,6)
   circfill(x+25,y+45,2,7)
   circfill(x+25,y+45,1,0)
   circfill(x+55,y+45,1,7)
 
-  print("good:    bad:",x+41,y+58,5)
+  print("GOOD:    BAD:",x+41,y+58,5)
   circfill(x+64,y+60,2,0)
   circfill(x+64,y+60,1,7)
   circfill(x+95,y+60,1,0)
 
-  print("energy is used",x+41,y+75,0)
-  print("for life and laser",x+25,y+81)
+  print("ENERGY IS USED",x+41,y+75,0)
+  print("FOR LIFE AND LASER",x+25,y+81)
 
-  print("good luck!",x+57,y+105,5)
+  print("GOOD LUCK",x+57,y+105,5)
   if every(4,0,2) then
     rectfill(x+5,y+65,x+8,y+101,7)
     rectfill(x+4,y+64,x+7,y+100,0)
@@ -973,11 +973,11 @@ function draw_death()
         if every(rnd(6)) then spr(33+rnd(4),x*8,y*8,1,1,rnd(2),rnd(2)) end
       end
     end
-    local message = "your score"
+    local message = "YOUR SCORE"
     if player.highscore then
-      message = "new high-score"
+      message = "NEW HIGH SCORE"
       rectfill(25,89,8*10+25,95,0)
-      print("old score:" .. oldscore, 26, 90, 7)
+      print("OLD SCORE:" .. oldscore, 26, 90, 7)
     end
     draw_highscore(player.score,message)
 
@@ -1005,7 +1005,7 @@ function _draw ()
     rectfill(0,0,4,128,9)
     rectfill(127-4,0,128,128,9)
   end
-  print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) .. " scene:" .. scene ),10,1,14)
+  --print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) .. " scene:" .. scene ),10,1,14)
 end
 __gfx__
 00000000eee7ee7eee7eeeeeeeeeeeeeeeeeeeeeee000eeeee777eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
