@@ -113,12 +113,13 @@ end
 function create_enemy_banana(x, y)
    local enemy = enemy_base(x, y)
    enemy.hp = 2000
-   enemy.sprite = 71
+   enemy.sprite = 72
    enemy.movement = 4
    enemy.shotpattern = 6
-   enemy.w = 4
+   enemy.w = 2
    enemy.h = 4
    enemy.gunoffset.y = -30
+   enemy.score = 5
    return enemy
 end
 
@@ -272,6 +273,7 @@ function update_enemy(e)
    if inside(player, e) then
      e.hit = true
      player.energy -= 1
+     player.combo = 1
      e.hp -= 5
    end
 end
@@ -460,6 +462,7 @@ function _init ()
    player.projectiles = {}
    player.score = 0
    player.highscore = false
+   player.combo = 1
    e_projectiles = {}
    polarity = false
 
@@ -540,14 +543,12 @@ function update_game()
       del(enemies,enemies[e])
 
     elseif hp < 1 then
-      if player.energy <= 20 then
-        player.score += 2*(enemies[e].score * (100 - player.energy))
-
-      else
-        player.score += (enemies[e].score * (100 - player.energy))
-
-      end
-      del(enemies,enemies[e])
+       local lowEnergyMulti = 1
+       if player.energy <= 20 then
+          lowEnergyMulti = 2
+       end
+       player.score += lowEnergyMulti * (enemies[e].score * (100 - player.energy))
+       del(enemies,enemies[e])
     end
 
   end
@@ -631,7 +632,6 @@ function collisions()
          if inside(player.projectiles[p], e) then
             e.hp -= 1
             e.hit = true
-
             if (every(4)) player.score += 1  sfx(12,3)
             del(player.projectiles,player.projectiles[p])
          end
@@ -641,11 +641,13 @@ function collisions()
   for p = #e_projectiles, 1, -1 do
       if inside(e_projectiles[p], player) then
         if e_projectiles[p].polarity ~= polarity then
-          player.energy += 5
-          player.score += 1
+          player.energy += 3
+          player.score += player.combo
+          player.combo += 1
         elseif e_projectiles[p].polarity == polarity then
-          player.energy -= 10
+          player.energy -= 15
           player.hit += 2
+          player.combo = 1
           sfx(13,3)
         end
         del(e_projectiles,e_projectiles[p])
@@ -796,13 +798,15 @@ function draw_ui()
   rectfill(2,energybar+1-player.energy,6,energybar+1,0)
   rectfill(1,energybar-player.energy,5,energybar,7)
   if energy < 20 and every(60,0,30) then
-    print("energy low",9,121,0)
-    print("energy low",9,120,9)
+    print("energy low",9,121-6,0)
+    print("energy low",9,120-6,9)
   end
   if player.highscore then
     print("new score", 87,121,0)
     print("new score", 87,120,9)
   end
+
+  print("x" .. player.combo,9+4,120,9)
 
   -- function polaritylabel()
   --   if polarity == false then
