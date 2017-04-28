@@ -298,6 +298,10 @@ end
 
 function spawn_enemy_wave_by_progress()
 
+   if #enemies >= 16 then
+      return
+   end
+
    progress += 1
 
    if progress % 30 == 0 then
@@ -963,7 +967,7 @@ function _draw ()
     rectfill(0,0,4,128,9)
     rectfill(127-4,0,128,128,9)
   end
-  --print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) .. " scene:" .. scene ),10,1,14)
+  print(("cpu:".. flr((stat(1)*100)) .. "% ram:" .. flr(stat(0)) .. " scene:" .. scene ),10,1,14)
 end
 __gfx__
 00000000eee7ee7eee7eeeeeeeeeeeeeeeeeeeeeee000eeeee777eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
