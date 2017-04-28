@@ -103,7 +103,7 @@ function create_enemy_stone(x, y)
    enemy.shotpattern = 5
    enemy.w = 2
    enemy.h = 2
-   enemy.gunoffset.y -= 10
+   enemy.gunoffset.y = -4
    if rnd(100) > 50 then
       enemy.polarity = true
    end
@@ -118,7 +118,19 @@ function create_enemy_banana(x, y)
    enemy.shotpattern = 6
    enemy.w = 4
    enemy.h = 4
-   enemy.gunoffset.y -= 30
+   enemy.gunoffset.y = -30
+   return enemy
+end
+
+function create_enemy_bomber(x, y)
+   local enemy = enemy_base(x, y)
+   enemy.hp = 100
+   enemy.sprite = 66
+   enemy.movement = 5
+   enemy.shotpattern = 7
+   enemy.w = 1
+   enemy.h = 1
+   enemy.charging = true
    return enemy
 end
 
@@ -165,8 +177,27 @@ function update_enemy(e)
       if e.y < 50 then
          e.y += 0.1
       end
+   elseif e.movement == 5 then
+      -- bomber movement
+      if e.charging then
+         e.y += 2
+         if e.y > 50 then
+            e.charging = false
+         end
+      else
+         if e.polarity then
+            e.x += cos(frames * 0.01)
+            e.y += sin(frames * 0.01)
+         else
+            if e.y > 20 then
+               e.y -= 0.5
+            else
+               e.charging = true
+            end
+         end
+      end
    end
-
+   
    gun_x = e.x + e.w * 4 + e.gunoffset.x
    gun_y = e.y + e.h * 8 + e.gunoffset.y
 
@@ -212,7 +243,7 @@ function update_enemy(e)
    elseif e.shotpattern == 5 then
       -- shot all directions
       if every(180) then
-         for angle = 0.0, 1.0, 0.1 do
+         for angle = 0.0, 1.0, 0.15 do
             add_e_projectile(gun_x, gun_y, e.polarity, angle, rnd(1.5) + 0.25)
          end
          e.polarity = not e.polarity
@@ -228,6 +259,11 @@ function update_enemy(e)
          add_e_projectile(gun_x, gun_y, not e.polarity, -0.025 + rnd(0.01) - 0.005, 1.5)
          add_e_projectile(gun_x, gun_y, not e.polarity, -0.025 + rnd(0.01) - 0.005, 0.5)
          add_e_projectile(gun_x, gun_y, e.polarity, -0.05 + rnd(0.01) - 0.005, 1.0)
+         e.polarity = not e.polarity
+      end
+   elseif e.shotpattern == 7 then
+      if every(60 * 5) then
+         add_e_projectile(gun_x, gun_y, e.polarity, 0, 0.5)
          e.polarity = not e.polarity
       end
    end
@@ -270,6 +306,8 @@ function spawn_enemy_wave_by_progress()
    if randLimit > 35 then randLimit = 35 end
    local r = flr(rnd(randLimit))
 
+   --r = 18
+
    if r > 30 then
       local i = 0
       for x in all(get_x_coord_pattern()) do
@@ -286,11 +324,16 @@ function spawn_enemy_wave_by_progress()
    elseif r > 20 then
       create_enemy_destroyer(get_x_coord_column(), -16)
       if rnd(100) > 90 then spawn_enemy_wave_by_progress() end
-   elseif r > 15 then
+   elseif r > 17 then
+      local xs = get_x_coord_pattern()
+      create_enemy_bomber(xs[1], -16)
+      create_enemy_bomber(xs[2], -8)
+      create_enemy_bomber(xs[3], -16)
+   elseif r > 13 then
       for i = 1, flr(rnd(2) + 1) do
          create_enemy_stone(get_x_coord_column(), -32 * i)
       end
-   elseif r > 10 then
+   elseif r > 8 then
       local xx = get_x_coord_column()
       create_enemy_peeper(xx, -16)
       create_enemy_peeper(128 - xx - 8, -16)
