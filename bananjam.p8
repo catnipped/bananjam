@@ -387,7 +387,7 @@ function update_e_projectiles()
   for p = #e_projectiles, 1, -1 do
     local x = e_projectiles[p].x
     local y = e_projectiles[p].y
-    if x > 120 or x < 8 or y > 128 or y < 20 then del(e_projectiles,e_projectiles[p]) end
+    if x > 120 or x < 8 or y > 128 or y < 0 then del(e_projectiles,e_projectiles[p]) end
   end
 end
 
