@@ -60,7 +60,7 @@ end
 
 function create_enemy_destroyer(x, y)
    local enemy = enemy_base(x, y)
-   enemy.hp = 130
+   enemy.hp = 180
    enemy.sprite = 96
    enemy.movement = 2
    enemy.w = 2
@@ -83,7 +83,7 @@ end
 
 function create_enemy_longship(x, y)
    local enemy = enemy_base(x, y)
-   enemy.hp = 200
+   enemy.hp = 300
    enemy.sprite = 68
    enemy.movement = 2
    enemy.shotpattern = 4
@@ -442,7 +442,7 @@ function update_game()
     --enemies
 
     local rate = 120 - (progress * 0.5)
-    if rate < 60 then rate = 60 end -- not shorter than 1 second
+    if rate < 30 then rate = 30 end
     
     if frames % rate == 0 then
        spawn_enemy_wave_by_progress()
