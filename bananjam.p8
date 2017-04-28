@@ -298,7 +298,7 @@ end
 
 function spawn_enemy_wave_by_progress()
 
-   if #enemies >= 16 then
+   if #enemies > 16 then
       return
    end
 
