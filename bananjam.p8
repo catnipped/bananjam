@@ -813,6 +813,10 @@ function draw_ui()
   if energy >= 100 then energy = "MAX" end
   print(energy,1,121,0)
   print(energy,1,120,7)
+  local length = 0
+  if player.combo > 9 then length = 4 end
+  print("X" .. player.combo,120-length,121,0)
+  print("X" .. player.combo,120-length,120,7)
   local energybar = 117
   local ragemode = 7
   if player.energy < 20 and every(4,0,2) then
@@ -821,11 +825,11 @@ function draw_ui()
   rectfill(2,energybar+1-player.energy,6,energybar+1,0)
   rectfill(1,energybar-player.energy,5,energybar,ragemode)
 
-  if player.highscore then
-    print("new score", 87,120,9)
+  if player.highscore and every (120,0,60)then
+    print("NEW SCORE", 80,120,9)
   end
 
-  print("x" .. player.combo,9+4,120,9)
+
 
   -- function polaritylabel()
   --   if polarity == false then
