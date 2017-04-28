@@ -407,9 +407,12 @@ function draw_e_projectiles()
     if p.polarity == true then
       circfill(p.x,p.y,p.size+1,7)
       circfill(p.x,p.y,p.size,0)
+      if polarity == true and every(4,0,2)
+      then circfill(p.x,p.y,p.size,9) end
     else
       circfill(p.x,p.y,p.size+1,0)
       circfill(p.x,p.y,p.size,7)
+      if polarity == false and every(4,0,2) then circfill(p.x,p.y,p.size,9) end
     end
   end
 end
@@ -444,12 +447,14 @@ function update_stars()
 end
 
 function draw_stars()
-	for star in all(stars) do
-		if (star.y > 0) then
-			-- rectfill(star.x-1, star.y-1, star.x+1, (star.y+star.s)+1, 0)
-			line(star.x, star.y, star.x, star.y+(star.s*2), (5+rnd(2)))
-		end
-	end
+  if stat(1) < 90 then
+  	for star in all(stars) do
+  		if (star.y > 0) then
+  			-- rectfill(star.x-1, star.y-1, star.x+1, (star.y+star.s)+1, 0)
+  			line(star.x, star.y, star.x, star.y+(star.s*2), (5+rnd(2)))
+  		end
+  	end
+  end
 end
 
 
