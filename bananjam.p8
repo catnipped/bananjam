@@ -369,12 +369,6 @@ function every(duration,offset,period)
   return offset_frames % duration < period
 end
 
-function pythagoras(ax,ay,bx,by)
-  local x = ax-bx
-  local y = ay-by
-  return sqrt(x*x+y*y)
-end
-
 function add_e_projectile(e_x,e_y, e_polarity, e_direction, e_velocity, e_size) --needs only an x,y
   e_direction = e_direction or 0
   e_velocity = e_velocity or 1
@@ -384,10 +378,17 @@ function add_e_projectile(e_x,e_y, e_polarity, e_direction, e_velocity, e_size) 
   add(e_projectiles,projectile)
 end
 
+function pythagoras(ax,ay,bx,by)
+  local x = ax-bx
+  local y = ay-by
+  return sqrt(x*x+y*y)
+end
+
+
 function update_e_projectiles()
   for p in all(e_projectiles) do
 
-    if pythagoras(p.x,p.y,player.x,player.y) < 15 and p.polarity ~= polarity then
+    if pythagoras(p.x,p.y,player.x+3,player.y+4) < 15 and p.polarity ~= polarity then
       p.x = lerp(p.x,player.x+3,0.2)
       p.y = lerp(p.y,player.y+6,0.2)
     else
@@ -461,9 +462,10 @@ end
 
 function _init ()
    --  scene = "title"
+   menuitem(1, "reset highscore", function() dset(1,0) dset(2,0) end)
    scene = "title"
    frames = 0
-
+   if dget(2) == nil then dset(2,0) end
    init_stars()
 
    player = {}
@@ -475,6 +477,7 @@ function _init ()
    player.hit = 0
    player.projectiles = {}
    player.score = 0
+   player.double = 0
    player.highscore = false
    player.combo = 1
    e_projectiles = {}
@@ -492,6 +495,39 @@ function _init ()
    timer_start(1, 1.0)
    timer_start(2, 10.0) --time to show high score
    music(0)
+end
+
+function compile_score(score,double)
+  local zeroes = ""
+  score = "" .. score
+  for x = 1, (8-#score) do
+     zeroes = zeroes .. "0"
+  end
+  score = zeroes .. score
+  local output = ""
+  if double == 1 then
+    local int = "00032000"
+    local buffer = 0
+    for n = 8,1,-1 do
+      local s = 0 .. sub(score,n,n)
+      local i = 0 .. sub(int,n,n)
+      local o = s+i+buffer
+      if o > 9 then o = 9 buffer = 1
+      else buffer = 0 end
+      output = o .. output
+    end
+  else
+    for n = 1,8 do
+      o = sub(score,n,n) or 0
+      output = output .. o
+    end
+  end
+  for n = 1,8 do
+    if sub(output,1,1) == "0" then
+      output = sub(output,2)
+    end
+  end
+    return output
 end
 
 function player_control()
@@ -522,11 +558,11 @@ function player_control()
   if btn(0) then player.x -= speed end
   player.x =mid (3,player.x,118)
   player.y =mid (0,player.y,120)
+  -- if (btnp(5,1)) player.score += 10000
 end
 
 function update_game()
   update_stars()
-  if (btnp(4,1)) dset(1,0) dset(2,0)
   -- player update
   player_control()
 
@@ -574,21 +610,19 @@ function update_game()
   update_e_projectiles()
   collisions()
 
+  if player.score >= 32000 then
+    player.score -= 32000
+    player.double = 1
+  end
+
   local highscore = get_score()
-  highscore = 0 + highscore
-  if player.score > highscore then player.highscore = true end
+  if player.score > highscore[1] and player.double == highscore[2] then player.highscore = true end
 
   if player.energy < 0 then
     scene = "dead"
     if player.highscore == true then
-      local score1 = 0 + sub(player.score,1,4)
       dset(1,player.score)
-      -- if player.score > 9999 then
-      --   local score2 = sub(player.score,5,8)
-      --   dset(2,score2)
-      -- else
-      --   dset(2,nil)
-      -- end
+      dset(2,player.double)
     end
     frames = 0
     timer_start(3,3.0)
@@ -682,8 +716,6 @@ function draw_highscore(score,string)
   pal()
   palt(0,false)
   palt(14,true)
-  local length = "0" .. score
-  length = #length -2
   local x = 26
   local y = 53
   rectfill(x-3,y-3,x + (8*5), y + 23, 7)
@@ -691,11 +723,10 @@ function draw_highscore(score,string)
   rectfill(x-2,y-2,x + (8*10), y + 22, 5)
   pal(0,7)
   pal(7,0)
-  for n = 0,length do
-    local nr = sub(score, n+1,n+1) or 0
-    nr = "0" .. nr
+  for n = 1,#score do
+    local nr = 0 .. sub(score, n,n)
     print(string,x,y-1,7)
-    spr(134+nr,(n*10)+x,y+5,1,2)
+    spr(134+nr,((n-1)*10)+x,y+5,1,2)
   end
 end
 
@@ -716,10 +747,11 @@ function draw_title()
   local sine = sin((frames/1000)*3.14)*7
   local sine2 = sin((frames/700)*3.14)*4
 
-  if every(60*30,60*10,60*10) then
+  if every(60*30,60*20,60*10) then
     local score = get_score()
-    draw_highscore(score, "high-score")
-  elseif every(60*30,60*20,60*10) then
+    local compiled = compile_score(score[1],score[2])
+    draw_highscore(compiled, "HIGH-SCORE")
+  elseif every(60*30,60*10,60*10) then
       draw_instructions()
   else
     if (every(60,0,30)) print("PRESS",40,22,0)
@@ -777,12 +809,11 @@ function draw_instructions()
 end
 
 function get_score()
-  local score = 0
-  -- if dget(1) > 0  and dget(2) > 0 then
-  --   score = dget(1) .. dget(2)
+  local score = {}
   if dget(1) > 0 then
-    score = dget(1)
-  end
+    score[1] = dget(1)
+  else score[1] = 0 end
+  if dget(2) == 1 then score[2] = 1 else score[2] = 0 end
   return score
 end
 
@@ -831,31 +862,17 @@ function draw_ui()
   rectfill(1,energybar-player.energy,5,energybar,ragemode)
 
   if player.highscore and every (120,0,60)then
-    print("NEW SCORE", 80,120,9)
+    print(player.double, 80,120,9)
   end
 
-
-
-  -- function polaritylabel()
-  --   if polarity == false then
-  --     rectfill(0,0,8,128,0)
-  --     pal(0,7)
-  --     map(1,0,0,0,1,16)
-  --   elseif polarity == true then
-  --     rectfill(0,0,8,128,7)
-  --     pal(7,0)
-  --     map(0,0,0,0,1,16)
-  --   end
-  -- end
   palt(14,true)
   palt(0,false)
   --
   player.score = flr(player.score)
-  local length = "0" .. player.score
-  length = #length -2
-  for n = length,0,-1 do
+  local length = compile_score(player.score,player.double)
+  for n = 1,#length do
 
-    local nr = sub(player.score, n+1,n+1) or 0
+    local nr = sub(compile_score(player.score,player.double), n,n) or 0
     nr = "0" .. nr
     if polarity == false then
       pal(0,7)
@@ -864,7 +881,7 @@ function draw_ui()
       pal(0,0)
       pal(7,7)
     end
-    spr(134+nr,119,n*16,1,2)
+    spr(134+nr,119,(n-1)*16,1,2)
   end
 
 
@@ -977,9 +994,11 @@ function draw_death()
     if player.highscore then
       message = "NEW HIGH SCORE"
       rectfill(25,89,8*10+25,95,0)
-      print("OLD SCORE:" .. oldscore, 26, 90, 7)
+
+
+      print("OLD SCORE:" .. compile_score(oldscore[1],oldscore[2]), 26, 90, 7)
     end
-    draw_highscore(player.score,message)
+    draw_highscore(compile_score(player.score, player.double),message)
 
     rectfill(0,0,4,128,9)
   	rectfill(127-4,0,128,128,9)
