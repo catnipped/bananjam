@@ -505,14 +505,15 @@ function compile_score(score,double)
   end
   score = zeroes .. score
   local output = ""
-  if double == 1 then
+  if double > 0 then
     local int = "00032000"
     local buffer = 0
     for n = 8,1,-1 do
       local s = 0 .. sub(score,n,n)
       local i = 0 .. sub(int,n,n)
-      local o = s+i+buffer
-      if o > 9 then o = 9 buffer = 1
+      local o = s+(i*double)+buffer
+      if o > 19 then o = 9 buffer = 2
+      elseif o > 9 then o = 9 buffer = 1
       else buffer = 0 end
       output = o .. output
     end
@@ -558,7 +559,7 @@ function player_control()
   if btn(0) then player.x -= speed end
   player.x =mid (3,player.x,118)
   player.y =mid (0,player.y,120)
-  -- if (btnp(5,1)) player.score += 10000
+  if (btnp(5,1)) player.score += 1000
 end
 
 function update_game()
@@ -612,7 +613,7 @@ function update_game()
 
   if player.score >= 32000 then
     player.score -= 32000
-    player.double = 1
+    player.double += 1
   end
 
   local highscore = get_score()
