@@ -273,13 +273,15 @@ function update_enemy(e)
    end
 
    --collision with player
-   if player.x + 8 > e.x and player.x < e.x + e.w and
-      player.y + 8 > e.y and player.y < e.y + e.h
-   then
-     e.hit = true
-     player.energy -= 1
-     player.combo = 1
-     e.hp -= 5
+   for p in all(players) do
+     if p.x + 8 > e.x and p.x < e.x + e.w and
+        p.y + 8 > e.y and p.y < e.y + e.h
+     then
+       e.hit = true
+       energy -= 1
+       combo = 1
+       e.hp -= 5
+     end
    end
 end
 
@@ -387,13 +389,14 @@ end
 
 function update_e_projectiles()
   for p in all(e_projectiles) do
-
-    if pythagoras(p.x,p.y,player.x+3,player.y+4) < 15 and p.polarity ~= polarity then
-      p.x = lerp(p.x,player.x+3,0.2)
-      p.y = lerp(p.y,player.y+6,0.2)
-    else
-      p.x = p.x+p.velocity*sin(p.direction)
-      p.y = p.y+p.velocity*cos(p.direction)
+    for n in all(players) do
+      if pythagoras(p.x,p.y,n.x+3,n.y+4) < 15 and p.polarity ~= n.polarity then
+        p.x = lerp(p.x,n.x+3,0.2)
+        p.y = lerp(p.y,n.y+6,0.2)
+      else
+        p.x = p.x+p.velocity*sin(p.direction)
+        p.y = p.y+p.velocity*cos(p.direction)
+      end
     end
   end
   for p = #e_projectiles, 1, -1 do
@@ -408,12 +411,12 @@ function draw_e_projectiles()
     if p.polarity == true then
       circfill(p.x,p.y,p.size+1,7)
       circfill(p.x,p.y,p.size,0)
-      if polarity == true and every(4,0,2)
+      if player_nr == 1 and players[1].polarity == true and every(4,0,2)
       then circfill(p.x,p.y,p.size,9) end
     else
       circfill(p.x,p.y,p.size+1,0)
       circfill(p.x,p.y,p.size,7)
-      if polarity == false and every(4,0,2) then circfill(p.x,p.y,p.size,9) end
+      if player_nr == 1 and players[1].polarity == false and every(4,0,2) then circfill(p.x,p.y,p.size,9) end
     end
   end
 end
@@ -461,40 +464,52 @@ end
 
 
 function _init ()
-   --  scene = "title"
-   menuitem(1, "reset highscore", function() dset(1,0) dset(2,0) end)
+   menuitem(3, "reset highscore", function() dset(1,0) dset(2,0) end)
+   menuitem(1, "1-player mode", function() player_nr = 1 init_game() end)
+   menuitem(2, "2-player mode", function() player_nr = 2 init_game() end)
+   player_nr = 1
    scene = "title"
    frames = 0
    if dget(2) == nil then dset(2,0) end
-   init_stars()
+   init_game()
+end
+function init_game ()
+  init_stars()
+  scene = "title"
+  frames = 0
+  players = {}
+  for i = 1,player_nr do
+    add(players, init_player(i))
+  end
 
-   player = {}
-   player.energy = 60
-   player.x = 64
-   player.y = 64
-   player.w = 1
-   player.h = 1
-   player.hit = 0
-   player.projectiles = {}
-   player.score = 0
-   player.double = 0
-   player.highscore = false
-   player.combo = 1
-   e_projectiles = {}
-   polarity = false
+  energy = 60
+  score = 0
+  double = 0
+  highscore = false
+  combo = 1
+  e_projectiles = {}
 
-   shield = {}
-   shield.x = 60
-   shield.y = 58
-   oldscore = get_score()
-   enemies = {}
-   progress = 0
-   explosions = {}
+  oldscore = get_score()
+  enemies = {}
+  progress = 0
+  explosions = {}
 
-   timers_clear()
-   timer_start(1, 1.0)
-   timer_start(2, 10.0) --time to show high score
-   music(0)
+  timers_clear()
+  timer_start(1, 1.0)
+  timer_start(2, 10.0) --time to show high score
+  music(0)
+end
+
+function init_player (n)
+  player = {}
+  player.x = 32*n
+  player.y = 64
+  player.w = 1
+  player.h = 1
+  player.hit = 0
+  player.projectiles = {}
+  if n == 1 then player.polarity = false else player.polarity = true end
+  return player
 end
 
 function compile_score(score,double)
@@ -531,50 +546,48 @@ function compile_score(score,double)
     return output
 end
 
-function player_control()
-  if btn(4) and player.energy > 1 then
-    add(player.projectiles,{x = player.x+3, y = player.y+4})
-    add(player.projectiles,{x = player.x+3, y = player.y+2})
-    add(player.projectiles,{x = player.x+3, y = player.y})
-    add(player.projectiles,{x = player.x+3, y = player.y-2})
-    add(player.projectiles,{x = player.x+3, y = player.y-4})
-    player.energy -= 0.1
-    local note = flr(player.energy/32)
+function player_control(p,n)
+  if btn(4,n) and energy > 1 then
+    add(p.projectiles,{x = p.x+3, y = p.y+4})
+    add(p.projectiles,{x = p.x+3, y = p.y+2})
+    add(p.projectiles,{x = p.x+3, y = p.y})
+    add(p.projectiles,{x = p.x+3, y = p.y-2})
+    add(p.projectiles,{x = p.x+3, y = p.y-4})
+    energy -= 0.1
+    local note = flr(energy/32)
     if (every(4)) sfx(10,2)
-
   else
     sfx(-1,3)
   end
-  if btnp(5) then
-    if polarity == false then polarity = true
-    elseif polarity == true then polarity = false
+  if btnp(5,n) and players[2] == nil then
+    if p.polarity == false then p.polarity = true
+    elseif p.polarity == true then p.polarity = false
     end
     sfx(14)
   end
   local speed = 1
-  if player.energy >= 100 then speed = 2 end
-  if btn(2) then player.y -= speed end
-  if btn(1) then player.x += speed end
-  if btn(3) then player.y += speed end
-  if btn(0) then player.x -= speed end
-  player.x =mid (3,player.x,118)
-  player.y =mid (0,player.y,120)
-  if (btnp(5,1)) player.score += 1000
+  if energy >= 100 then speed = 2 end
+  if btn(2,n) then p.y -= speed end
+  if btn(1,n) then p.x += speed end
+  if btn(3,n) then p.y += speed end
+  if btn(0,n) then p.x -= speed end
+  p.x = mid(3,p.x,118)
+  p.y = mid(0,p.y,120)
 end
 
 function update_game()
   update_stars()
   -- player update
-  player_control()
-
-
-  -- shield.x = lerp(shield.x,player.x-4,0.1)
-	-- shield.y = lerp(shield.y,player.y-8,0.5)
-	for n = #player.projectiles, 1, -1 do
-		player.projectiles[n].y -= 8
-    player.projectiles[n].x = player.x+3
-		if player.projectiles[n].y < -30 then del(player.projectiles,player.projectiles[1]) end
-	end
+  local n = 0
+  for p in all(players) do
+    player_control(p,n)
+    n += 1
+    for n = #p.projectiles, 1, -1 do
+  		p.projectiles[n].y -= 8
+      p.projectiles[n].x = p.x+3
+  		if p.projectiles[n].y < -30 then del(p.projectiles,p.projectiles[1]) end
+  	end
+  end
 
     --enemies
 
@@ -598,10 +611,10 @@ function update_game()
 
     elseif hp < 1 then
        local lowEnergyMulti = 1
-       if player.energy <= 20 then
+       if energy <= 20 then
           lowEnergyMulti = 2
        end
-       player.score += lowEnergyMulti * (enemies[e].score * 10 * player.combo)
+       score += lowEnergyMulti * (enemies[e].score * 10 * combo)
        add(explosions,{ex = x+4*enemies[e].w, ey = y+4*enemies[e].h, size = 4*enemies[e].h})
        del(enemies,enemies[e])
     end
@@ -611,27 +624,25 @@ function update_game()
   update_e_projectiles()
   collisions()
 
-  if player.score >= 32000 then
-    player.score -= 32000
-    player.double += 1
+  if score >= 32000 then
+    score -= 32000
+    double += 1
   end
 
-  local highscore = get_score()
-  if player.score > highscore[1] and player.double == highscore[2] then player.highscore = true end
+  local oldhighscore = get_score()
+  if score > oldhighscore[1] and double == oldhighscore[2] then highscore = true end
 
-  if player.energy < 0 then
+  if energy < 0 then
     scene = "dead"
-    if player.highscore == true then
-      dset(1,player.score)
-      dset(2,player.double)
+    if highscore == true then
+      dset(1,score)
+      dset(2,double)
     end
     frames = 0
     timer_start(3,3.0)
     sfx(6)
   end
-  player.energy = mid(0,player.energy,100)
-
-
+  energy = mid(0,energy,100)
 end
 
 function _update60 ()
@@ -650,8 +661,6 @@ function _update60 ()
   elseif scene == "dead" then
     music(-1)
     update_death()
-
-
   elseif scene == "game" then
     update_game()
   end
@@ -666,7 +675,7 @@ function update_death()
      scene = "title"
      sfx(-1)
      music(0)
-     _init()
+     init_game()
   end
 end
 
@@ -682,34 +691,38 @@ end
 function collisions()
    --laser collison
    local playerLaserDMG = 1
-   if player.energy <= 20 then
+   if energy <= 20 then
       playerLaserDMG = 2
    end
-   for p = #player.projectiles, 1, -1 do
-      for e in all(enemies) do
-         if inside(player.projectiles[p], e) then
-            e.hp -= playerLaserDMG
-            e.hit = true
-            if (every(4)) player.score += 1  sfx(12,3)
-            del(player.projectiles,player.projectiles[p])
-         end
-      end
+   for p in all(players) do
+     for i = #p.projectiles, 1, -1 do
+        for e in all(enemies) do
+           if inside(p.projectiles[i], e) then
+              e.hp -= playerLaserDMG
+              e.hit = true
+              if (every(4)) score += 1  sfx(12,3)
+              del(p.projectiles,p.projectiles[p])
+           end
+        end
+     end
    end
   --enemy collisions
-  for p = #e_projectiles, 1, -1 do
-      if inside(e_projectiles[p], player) then
-        if e_projectiles[p].polarity ~= polarity then
-          player.energy += 3
-          player.score += player.combo
-          player.combo += 1
-        elseif e_projectiles[p].polarity == polarity then
-          player.energy -= 12
-          player.hit += 2
-          player.combo = 1
-          sfx(13,3)
+  for p in all(players) do
+    for i = #e_projectiles, 1, -1 do
+        if inside(e_projectiles[i], p) then
+          if e_projectiles[i].polarity ~= p.polarity then
+            energy += 3
+            score += combo
+            combo += 1
+          elseif e_projectiles[i].polarity == p.polarity then
+            energy -= 12
+            p.hit += 2
+            combo = 1
+            sfx(13,3)
+          end
+          del(e_projectiles,e_projectiles[i])
         end
-        del(e_projectiles,e_projectiles[p])
-      end
+    end
   end
 end
 
@@ -751,7 +764,7 @@ function draw_title()
   if every(60*30,60*20,60*10) then
     local score = get_score()
     local compiled = compile_score(score[1],score[2])
-    draw_highscore(compiled, "HIGH-SCORE")
+    draw_highscore(compiled, "HIGHSCORE")
   elseif every(60*30,60*10,60*10) then
       draw_instructions()
   else
@@ -822,7 +835,7 @@ function draw_ui()
   palt(0,false)
   palt(14,true)
 
-  if btnp (5) then
+  if btnp (5) and players[2] == false then
       for x = 0,15 do
         for y = 0,15 do
           spr(33+rnd(4),x*8,y*8)
@@ -833,17 +846,16 @@ function draw_ui()
 	rectfill(0,0,4,128,9)
 	rectfill(127-4,0,128,128,9)
 
-
   if btn(4) and every(4,0,2) then
     pal(0,7)
     pal(7,0)
   end
-  local energy = flr(player.energy)
-  if polarity == true then
+  local energy = flr(energy)
+  if players[1].polarity == true then
     pal(0,7)
     pal(7,0)
   end
-  if polarity == true and btn(4) and every(4,0,2) then
+  if players[1].polarity == true and btn(4) and every(4,0,2) then
     pal(0,0)
     pal(7,7)
   end
@@ -851,34 +863,34 @@ function draw_ui()
   print(energy,1,121,0)
   print(energy,1,120,7)
   local length = 0
-  if player.combo > 9 then length = 4 end
-  print("X" .. player.combo,120-length,121,0)
-  print("X" .. player.combo,120-length,120,7)
+  if combo > 9 then length = 4 end
+  print("X" .. combo,120-length,121,0)
+  print("X" .. combo,120-length,120,7)
   local energybar = 117
   local ragemode = 7
-  if player.energy < 20 and every(4,0,2) then
+  if energy < 20 and every(4,0,2) then
     ragemode = 9
   end
-  rectfill(2,energybar+1-player.energy,6,energybar+1,0)
-  rectfill(1,energybar-player.energy,5,energybar,ragemode)
+  rectfill(2,energybar+1-energy,6,energybar+1,0)
+  rectfill(1,energybar-energy,5,energybar,ragemode)
 
-  if player.highscore and every (120,0,60)then
-    print(player.double, 80,120,9)
+  if highscore and every (120,0,60)then
+    print("NEW SCORE", 80,120,9)
   end
 
   palt(14,true)
   palt(0,false)
   --
-  player.score = flr(player.score)
-  local length = compile_score(player.score,player.double)
+  score = flr(score)
+  local length = compile_score(score,double)
   for n = 1,#length do
 
-    local nr = sub(compile_score(player.score,player.double), n,n) or 0
+    local nr = sub(compile_score(score,double), n,n) or 0
     nr = "0" .. nr
-    if polarity == false then
+    if players[1].polarity == false then
       pal(0,7)
       pal(7,0)
-    elseif polarity == true then
+    elseif players[1].polarity == true then
       pal(0,0)
       pal(7,7)
     end
@@ -895,7 +907,10 @@ function draw_game()
   palt(14,true)
 
   --background and stars
-  if polarity == true then
+  if players[2] then
+    rectfill(0,0,128,128,5)
+    draw_stars()
+  elseif players[1].polarity == true then
     rectfill(0,0,128,128,7)
     pal(0,7)
     pal(7,0)
@@ -904,25 +919,31 @@ function draw_game()
     pal(0,0)
   else draw_stars() end
 
-  if player.hit > 0 and polarity == true then
-    circfill(player.x+3,player.y+4,player.hit*(1+rnd(4)),0)
-    player.hit -= 1
-    mid(player.hit,0,20)
-  elseif player.hit > 0 then
-    circfill(player.x+3,player.y+4,player.hit*(1+rnd(4)),7)
-    player.hit -= 1
+  local player_nr = 0
+  for p in all(players) do
+    if p.hit > 0 and p.polarity == true then
+      circfill(p.x+3,p.y+4,p.hit*(1+rnd(4)),0)
+      p.hit -= 1
+      mid(p.hit,0,20)
+    elseif p.hit > 0 then
+      circfill(p.x+3,p.y+4,p.hit*(1+rnd(4)),7)
+      p.hit -= 1
+    end
+
+    local ragemode0 = 0
+    local ragemode7 = 7
+    if energy < 20 then ragemode0=9 ragemode7=9 end
+    --projectiles
+    for i = #p.projectiles, 1, -1 do
+      n = p.projectiles[i]
+      if every(2,1) and p.polarity then line(n.x,n.y,n.x,n.y+3,ragemode0)
+      elseif every(2,1) then line(n.x,n.y,n.x,n.y+3,ragemode7) end
+    end
+    if btn(4,player_nr) and p.polarity and every(2,1) then circfill(p.x+3,p.y-3,2,ragemode0)
+    elseif btn(4,player_nr) and every(2,1) then circfill(p.x+3,p.y-3,2,ragemode7) end
+    player_nr += 1
   end
-  local ragemode0 = 0
-  local ragemode7 = 7
-  if player.energy < 20 then ragemode0=9 ragemode7=9 end
-  --projectiles
-  for i = #player.projectiles, 1, -1 do
-    n = player.projectiles[i]
-    if every(2,1) and polarity then line(n.x,n.y,n.x,n.y+3,ragemode0)
-    elseif every(2,1) then line(n.x,n.y,n.x,n.y+3,ragemode7) end
-  end
-  if btn(4) and polarity and every(2,1) then circfill(player.x+3,player.y-3,2,ragemode0)
-  elseif btn(4) and every(2,1) then circfill(player.x+3,player.y-3,2,ragemode7) end
+
   draw_e_projectiles()
 
 
@@ -931,7 +952,7 @@ function draw_game()
   --enemies
   for e in all(enemies) do
     if e.hit then
-        local x = player.x+4
+        local x = e.x+4
         local y = e.y + (e.h*8)
         circfill(x,y,rnd(4),5+rnd(2))
     end
@@ -939,12 +960,12 @@ function draw_game()
       pal(0,7)
       pal(7,0)
     end
-    if e.hit and polarity == true then
+    if e.hit and players[1].polarity == true then
       pal(0,0)
       pal(8,0)
       pal(7,0)
       e.hit = false
-    elseif e.hit and polarity == false then
+    elseif e.hit and players[1].polarity == false then
       pal(0,7)
       pal(8,7)
       pal(7,7)
@@ -957,7 +978,7 @@ function draw_game()
     for e = #explosions, 1, -1 do
       local e = explosions[e]
       local color = 0
-      if polarity then color = 7 end
+      if players[1].polarity then color = 7 end
       circfill(e.ex,e.ey,e.size,color)
       e.size -= rnd(1)
       if e.size < 0 then del(explosions,explosions[e]) end
@@ -969,18 +990,21 @@ function draw_game()
   palt(0,false)
   palt(14,true)
   --player
-  local ship_sprite = 5
-  local ship_sprite_turning = 39
+  local players_nr = 0
+  for p in all(players) do
+    local ship_sprite = 5
+    local ship_sprite_turning = 39
 
-  if polarity == true then
-    ship_sprite = 6
-    ship_sprite_turning = 40
+    if p.polarity == true then
+      ship_sprite = 6
+      ship_sprite_turning = 40
+    end
+
+    if btn(0,players_nr) then spr(ship_sprite_turning,p.x-1,p.y)
+    elseif btn(1,players_nr) then spr(ship_sprite_turning,p.x,p.y,1,1,true)
+    else spr(ship_sprite,p.x,p.y) end
+    players_nr += 1
   end
-
-  if btn(0) then spr(ship_sprite_turning,player.x-1,player.y)
-  elseif btn(1) then spr(ship_sprite_turning,player.x,player.y,1,1,true)
-  else spr(ship_sprite,player.x,player.y) end
-
   draw_ui()
 end
 
@@ -992,20 +1016,22 @@ function draw_death()
       end
     end
     local message = "YOUR SCORE"
-    if player.highscore then
-      message = "NEW HIGH SCORE"
+    if highscore then
+      message = "NEW HIGHSCORE"
       rectfill(25,89,8*10+25,95,0)
 
 
       print("OLD SCORE:" .. compile_score(oldscore[1],oldscore[2]), 26, 90, 7)
     end
-    draw_highscore(compile_score(player.score, player.double),message)
+    draw_highscore(compile_score(score, double),message)
 
     rectfill(0,0,4,128,9)
   	rectfill(127-4,0,128,128,9)
   else
-    if every(2) then circfill(player.x+3,player.y+2,frames/4,7)
-    else circfill(player.x+4,player.y+3,frames/4,0) end
+    for p in all(players) do
+      if every(2) then circfill(p.x+3,p.y+2,frames/4,7)
+      else circfill(p.x+4,p.y+3,frames/4,0) end
+    end
   end
 end
 
