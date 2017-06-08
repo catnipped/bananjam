@@ -393,11 +393,11 @@ function update_e_projectiles()
       if pythagoras(p.x,p.y,n.x+3,n.y+4) < 15 and p.polarity ~= n.polarity then
         p.x = lerp(p.x,n.x+3,0.2)
         p.y = lerp(p.y,n.y+6,0.2)
-      else
-        p.x = p.x+p.velocity*sin(p.direction)
-        p.y = p.y+p.velocity*cos(p.direction)
       end
     end
+        p.x = p.x+p.velocity*sin(p.direction)
+        p.y = p.y+p.velocity*cos(p.direction)
+
   end
   for p = #e_projectiles, 1, -1 do
     local x = e_projectiles[p].x
